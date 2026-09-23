@@ -1,0 +1,568 @@
+import type { Listing } from "@/types/listing";
+import { listingGallery } from "@/data/images";
+
+const sellers = {
+  adria: {
+    name: "Adria Mobile Homes",
+    type: "Profesionalni prodajalec" as const,
+    location: "Ljubljana",
+    country: "Slovenija" as const,
+    phone: "01 234 56 78",
+    memberSince: 2015,
+    activeListings: 34,
+  },
+  alpe: {
+    name: "Alpe Hiške d.o.o.",
+    type: "Profesionalni prodajalec" as const,
+    location: "Kranjska Gora",
+    country: "Slovenija" as const,
+    phone: "04 588 12 30",
+    memberSince: 2018,
+    activeListings: 21,
+  },
+  tinyhome: {
+    name: "TinyHome Slovenija",
+    type: "Profesionalni prodajalec" as const,
+    location: "Celje",
+    country: "Slovenija" as const,
+    phone: "03 425 90 11",
+    memberSince: 2020,
+    activeListings: 16,
+  },
+  kranjskaKoca: {
+    name: "Kranjska Koča d.o.o.",
+    type: "Profesionalni prodajalec" as const,
+    location: "Bled",
+    country: "Slovenija" as const,
+    phone: "04 576 40 02",
+    memberSince: 2017,
+    activeListings: 12,
+  },
+  modularneResitve: {
+    name: "Modularne Rešitve d.o.o.",
+    type: "Profesionalni prodajalec" as const,
+    location: "Maribor",
+    country: "Slovenija" as const,
+    phone: "02 320 77 45",
+    memberSince: 2019,
+    activeListings: 27,
+  },
+  nordicAdriatic: {
+    name: "Nordic Living Adriatic",
+    type: "Profesionalni prodajalec" as const,
+    location: "Koper",
+    country: "Slovenija" as const,
+    phone: "05 663 21 09",
+    memberSince: 2021,
+    activeListings: 9,
+  },
+  marko: {
+    name: "Marko Novak",
+    type: "Zasebnik" as const,
+    location: "Novo Mesto",
+    country: "Slovenija" as const,
+    phone: "031 222 333",
+    memberSince: 2023,
+  },
+  ana: {
+    name: "Ana Kovač",
+    type: "Zasebnik" as const,
+    location: "Murska Sobota",
+    country: "Slovenija" as const,
+    phone: "041 555 678",
+    memberSince: 2022,
+  },
+  peter: {
+    name: "Peter Horvat",
+    type: "Zasebnik" as const,
+    location: "Rijeka",
+    country: "Hrvaška" as const,
+    phone: "+385 91 234 567",
+    memberSince: 2021,
+  },
+};
+
+export const listings: Listing[] = [
+  {
+    id: "1",
+    slug: "nordic-living-40",
+    title: "Nordic Living 40",
+    manufacturer: "Nordic Living",
+    price: 39900,
+    year: 2024,
+    condition: "nova",
+    type: "mobilna",
+    area: 40,
+    width: 4,
+    length: 10,
+    bedrooms: 3,
+    bathrooms: 1,
+    capacity: 6,
+    location: "Ljubljana",
+    country: "Slovenija",
+    deliveryAvailable: true,
+    featured: true,
+    description:
+      "Nordic Living 40 je kompaktna mobilna hiška, zasnovana za celoletno bivanje. Izolacija je izvedena po skandinavskem standardu, notranjost pa je svetla zaradi velikih panoramskih oken na južni strani. Primerna je za družino ali kot dodatna bivalna enota na parceli.",
+    features: [
+      "Talno gretje",
+      "Skandinavska lesena fasada",
+      "Panoramska okna",
+      "Vgrajena kuhinja",
+      "Preverjena izolacija (U ≤ 0,18 W/m²K)",
+      "Terasa 8 m²",
+    ],
+    images: listingGallery(0),
+    seller: sellers.adria,
+  },
+  {
+    id: "2",
+    slug: "kombi-home-compact-25",
+    title: "Kombi Home Compact 25",
+    manufacturer: "Kombi Home",
+    price: 18500,
+    year: 2019,
+    condition: "rabljena",
+    type: "mobilna",
+    area: 25,
+    width: 4,
+    length: 6.3,
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 3,
+    location: "Maribor",
+    country: "Slovenija",
+    deliveryAvailable: false,
+    description:
+      "Rabljena mobilna hiška v zelo dobrem stanju, redno vzdrževana in primerna za takojšnjo uporabo. Idealna kot vikend hiška ali gostinska enota na kampu. Fasada je bila obnovljena leta 2022.",
+    features: [
+      "Klimatska naprava",
+      "Kuhinjski blok",
+      "Prha in WC",
+      "Obnovljena fasada (2022)",
+      "Zunanja terasa",
+    ],
+    images: listingGallery(1),
+    seller: sellers.modularneResitve,
+  },
+  {
+    id: "3",
+    slug: "alpska-koca-55",
+    title: "Alpska Koča 55",
+    manufacturer: "Alpe Hiške",
+    price: 68000,
+    year: 2025,
+    condition: "nova",
+    type: "modularna",
+    area: 55,
+    width: 7,
+    length: 7.9,
+    bedrooms: 3,
+    bathrooms: 2,
+    capacity: 6,
+    location: "Kranjska Gora",
+    country: "Slovenija",
+    deliveryAvailable: true,
+    featured: true,
+    description:
+      "Modularna hiška v alpskem slogu, izdelana iz masivnega lesa in prilagojena zahtevnejšim vremenskim razmeram. Streha je dimenzionirana za visoke snežne obremenitve, notranjost pa kombinira les in beton za miren, sodoben videz.",
+    features: [
+      "Masivna lesena konstrukcija",
+      "Ojačana streha (visoka snežna obtežba)",
+      "Dve kopalnici",
+      "Kamin na drva",
+      "Talno gretje",
+      "Zunanja terasa 15 m²",
+    ],
+    images: listingGallery(2),
+    seller: sellers.alpe,
+  },
+  {
+    id: "4",
+    slug: "econest-studio-20",
+    title: "EcoNest Studio 20",
+    manufacturer: "EcoNest",
+    price: 22900,
+    year: 2024,
+    condition: "nova",
+    type: "mobilna",
+    area: 20,
+    width: 4,
+    length: 5,
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 2,
+    location: "Celje",
+    country: "Slovenija",
+    deliveryAvailable: true,
+    description:
+      "Minimalistična studio hiška, primerna za enega ali dva stanovalca. Zasnovana je za nizko porabo energije, z dobro izolacijo in kompaktno razporeditvijo prostora, ki izkoristi vsak kvadratni meter.",
+    features: [
+      "Nizkoenergijska izolacija",
+      "Kompaktna kopalnica",
+      "Vgrajene omare",
+      "Priprava za sončne panele",
+    ],
+    images: listingGallery(3),
+    seller: sellers.tinyhome,
+  },
+  {
+    id: "5",
+    slug: "vivo-modular-70",
+    title: "Vivo Modular 70",
+    manufacturer: "Vivo Modular",
+    price: 89500,
+    year: 2025,
+    condition: "nova",
+    type: "modularna",
+    area: 70,
+    width: 8,
+    length: 8.8,
+    bedrooms: 4,
+    bathrooms: 2,
+    capacity: 8,
+    location: "Zagreb",
+    country: "Hrvaška",
+    deliveryAvailable: true,
+    featured: true,
+    description:
+      "Prostorna modularna hiša za družine, sestavljena iz dveh modulov, ki se poveže na lokaciji v enoten objekt. Razporeditev omogoča ločen dnevni in spalni del, kar je primerno za celoletno bivanje.",
+    features: [
+      "Dvomodularna zasnova",
+      "Ločen dnevni in spalni del",
+      "Dve kopalnici",
+      "Aluminijasto stavbno pohištvo",
+      "Pametni termostat",
+    ],
+    images: listingGallery(4),
+    seller: sellers.modularneResitve,
+  },
+  {
+    id: "6",
+    slug: "terrasmart-35",
+    title: "TerraSmart 35",
+    manufacturer: "TerraSmart",
+    price: 24000,
+    year: 2020,
+    condition: "rabljena",
+    type: "mobilna",
+    area: 35,
+    width: 4,
+    length: 8.8,
+    bedrooms: 2,
+    bathrooms: 1,
+    capacity: 4,
+    location: "Novo Mesto",
+    country: "Slovenija",
+    deliveryAvailable: false,
+    description:
+      "Družinska mobilna hiška, v uporabi od leta 2020 in vzdrževana skladno z navodili proizvajalca. Notranjost je funkcionalna, z ločeno spalnico za starše in otroško sobo.",
+    features: [
+      "Dve ločeni spalnici",
+      "Kuhinja z jedilnim kotom",
+      "Zunanja shramba",
+      "Zamenjana talna obloga (2023)",
+    ],
+    images: listingGallery(5),
+    seller: sellers.marko,
+  },
+  {
+    id: "7",
+    slug: "lumo-hiska-30",
+    title: "Lumo Hiška 30",
+    manufacturer: "Lumo",
+    price: 31200,
+    year: 2023,
+    condition: "nova",
+    type: "mobilna",
+    area: 30,
+    width: 4,
+    length: 7.5,
+    bedrooms: 2,
+    bathrooms: 1,
+    capacity: 4,
+    location: "Koper",
+    country: "Slovenija",
+    deliveryAvailable: true,
+    description:
+      "Svetla mobilna hiška s poudarkom na naravni svetlobi in obalnim podnebjem prilagojeni izolaciji. Primerna za vikend uporabo ob morju ali kot stalno bivališče na manjši parceli.",
+    features: [
+      "Protivlažna zaščita fasade",
+      "Velika steklena vrata na teraso",
+      "Klimatska naprava",
+      "Zunanja tuš kabina",
+    ],
+    images: listingGallery(6),
+    seller: sellers.nordicAdriatic,
+  },
+  {
+    id: "8",
+    slug: "gorenjka-modul-45",
+    title: "Gorenjka Modul 45",
+    manufacturer: "Gorenjka Modul",
+    price: 42000,
+    year: 2018,
+    condition: "rabljena",
+    type: "modularna",
+    area: 45,
+    width: 6,
+    length: 7.5,
+    bedrooms: 2,
+    bathrooms: 1,
+    capacity: 5,
+    location: "Bled",
+    country: "Slovenija",
+    deliveryAvailable: false,
+    description:
+      "Modularna hiška z gorenjsko lokacijo v mislih, primerna za apartmajsko oddajanje ali stalno bivanje. Objekt je bil od izgradnje enkrat obnovljen, streha je bila zamenjana leta 2021.",
+    features: [
+      "Zamenjana streha (2021)",
+      "Lesena obloga fasade",
+      "Kuhinja z otokom",
+      "Balkon z razgledom",
+    ],
+    images: listingGallery(7),
+    seller: sellers.kranjskaKoca,
+  },
+  {
+    id: "9",
+    slug: "sunpod-mini-18",
+    title: "SunPod Mini 18",
+    manufacturer: "SunPod",
+    price: 19900,
+    year: 2024,
+    condition: "nova",
+    type: "mobilna",
+    area: 18,
+    width: 3,
+    length: 6,
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 2,
+    location: "Trst",
+    country: "Italija",
+    deliveryAvailable: true,
+    description:
+      "Najmanjši model v ponudbi, zasnovan za enostaven transport in hitro postavitev. Kljub majhni površini vsebuje popolnoma opremljeno kopalnico in kuhinjski kot.",
+    features: [
+      "Enostaven transport",
+      "Kompaktna kuhinja",
+      "Tuš kabina",
+      "Priprava za priklop na omrežje",
+    ],
+    images: listingGallery(8),
+    seller: sellers.tinyhome,
+  },
+  {
+    id: "10",
+    slug: "framehouse-60",
+    title: "Framehouse 60",
+    manufacturer: "Framehouse",
+    price: 95000,
+    year: 2025,
+    condition: "nova",
+    type: "modularna",
+    area: 60,
+    width: 7.5,
+    length: 8,
+    bedrooms: 3,
+    bathrooms: 2,
+    capacity: 6,
+    location: "Salzburg",
+    country: "Avstrija",
+    deliveryAvailable: true,
+    description:
+      "Avstrijsko izdelana modularna hiša z visoko stopnjo energetske učinkovitosti in premium izvedbo notranjosti. Primerna za stranke, ki iščejo trajno rešitev z nizkimi stroški ogrevanja.",
+    features: [
+      "Energetski razred A+",
+      "Toplotna črpalka",
+      "Dve kopalnici s talnim gretjem",
+      "Trojna zasteklitev",
+      "Predal za kolesa in orodje",
+    ],
+    images: listingGallery(9),
+    seller: sellers.adria,
+  },
+  {
+    id: "11",
+    slug: "kompakt-bivalnik-28",
+    title: "Kompakt Bivalnik 28",
+    manufacturer: "Kompakt Bivalniki",
+    price: 15900,
+    year: 2016,
+    condition: "rabljena",
+    type: "mobilna",
+    area: 28,
+    width: 4,
+    length: 7,
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 3,
+    location: "Murska Sobota",
+    country: "Slovenija",
+    deliveryAvailable: false,
+    description:
+      "Cenovno dostopna mobilna hiška, primerna kot začetna rešitev ali dodatna enota na kmetiji. Tehnično je v voznem stanju, notranjost je bila delno prenovljena leta 2022.",
+    features: [
+      "Delno prenovljena notranjost (2022)",
+      "Osnovna kuhinja",
+      "Kopalnica s prho",
+      "Nizka nabavna cena",
+    ],
+    images: listingGallery(10),
+    seller: sellers.ana,
+  },
+  {
+    id: "12",
+    slug: "nordic-living-50-xl",
+    title: "Nordic Living 50 XL",
+    manufacturer: "Nordic Living",
+    price: 54900,
+    year: 2024,
+    condition: "nova",
+    type: "mobilna",
+    area: 50,
+    width: 4,
+    length: 12.5,
+    bedrooms: 3,
+    bathrooms: 2,
+    capacity: 6,
+    location: "Portorož",
+    country: "Slovenija",
+    deliveryAvailable: true,
+    featured: true,
+    description:
+      "Podaljšana različica priljubljenega modela Nordic Living, z dodatno kopalnico in večjo dnevno sobo. Zasnovana za celoletno bivanje ob morju, z okrepljeno zaščito pred vlago in soljo.",
+    features: [
+      "Dve kopalnici",
+      "Okrepljena protikorozijska zaščita",
+      "Klimatska naprava",
+      "Velika terasa 12 m²",
+      "Vgrajena kuhinja z otokom",
+    ],
+    images: listingGallery(11),
+    seller: sellers.nordicAdriatic,
+  },
+  {
+    id: "13",
+    slug: "modul-vrt-22",
+    title: "Modul Vrt 22",
+    manufacturer: "Modul Vrt",
+    price: 21000,
+    year: 2017,
+    condition: "rabljena",
+    type: "modularna",
+    area: 22,
+    width: 5,
+    length: 4.4,
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 3,
+    location: "Rijeka",
+    country: "Hrvaška",
+    deliveryAvailable: false,
+    description:
+      "Manjša modularna hiška, primerna za vrtno namestitev ali kot gostujoča enota. Prodaja jo zasebnik, objekt je funkcionalen in pripravljen za selitev.",
+    features: [
+      "Kompaktna zasnova",
+      "Kuhinjski kot",
+      "Kopalnica s prho",
+      "Enostavna selitev",
+    ],
+    images: listingGallery(12),
+    seller: sellers.peter,
+  },
+  {
+    id: "14",
+    slug: "alpska-koca-38-compact",
+    title: "Alpska Koča 38 Compact",
+    manufacturer: "Alpe Hiške",
+    price: 46500,
+    year: 2025,
+    condition: "nova",
+    type: "modularna",
+    area: 38,
+    width: 5,
+    length: 7.6,
+    bedrooms: 2,
+    bathrooms: 1,
+    capacity: 4,
+    location: "Bohinj",
+    country: "Slovenija",
+    deliveryAvailable: true,
+    description:
+      "Manjša različica priljubljene Alpske koče, prilagojena parcelam z omejenim prostorom. Ohranja enako kakovost izdelave in materiale kot večji model, v bolj kompaktni obliki.",
+    features: [
+      "Masivna lesena konstrukcija",
+      "Ojačana streha",
+      "Talno gretje",
+      "Terasa 8 m²",
+    ],
+    images: listingGallery(13),
+    seller: sellers.alpe,
+  },
+];
+
+export function getListingBySlug(slug: string): Listing | undefined {
+  return listings.find((listing) => listing.slug === slug);
+}
+
+export function getFeaturedListings(): Listing[] {
+  return listings.filter((listing) => listing.featured);
+}
+
+export function getLatestListings(count = 8): Listing[] {
+  return [...listings].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, count);
+}
+
+export function slugifySellerName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export interface Provider {
+  name: string;
+  slug: string;
+  location: string;
+  country: Listing["country"];
+  activeListings: number;
+}
+
+export function getProviders(): Provider[] {
+  const bySlug = new Map<string, Provider>();
+
+  for (const listing of listings) {
+    if (listing.seller.type !== "Profesionalni prodajalec") continue;
+    const slug = slugifySellerName(listing.seller.name);
+    const existing = bySlug.get(slug);
+    if (existing) {
+      existing.activeListings += 1;
+    } else {
+      bySlug.set(slug, {
+        name: listing.seller.name,
+        slug,
+        location: listing.seller.location,
+        country: listing.seller.country,
+        activeListings: 1,
+      });
+    }
+  }
+
+  return Array.from(bySlug.values()).sort((a, b) => b.activeListings - a.activeListings);
+}
+
+export function getProviderBySlug(slug: string): Provider | undefined {
+  return getProviders().find((provider) => provider.slug === slug);
+}
+
+export function getListingsByProviderSlug(slug: string): Listing[] {
+  return listings.filter(
+    (listing) =>
+      listing.seller.type === "Profesionalni prodajalec" &&
+      slugifySellerName(listing.seller.name) === slug
+  );
+}
