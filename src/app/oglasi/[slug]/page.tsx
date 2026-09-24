@@ -9,6 +9,7 @@ import { ListingGallery } from "@/components/listings/ListingGallery";
 import { ListingSpecs } from "@/components/listings/ListingSpecs";
 import { SellerCard } from "@/components/listings/SellerCard";
 import { ListingInquiryBox } from "@/components/listings/ListingInquiryBox";
+import { InquiryModal } from "@/components/listings/InquiryModal";
 import { formatPrice } from "@/lib/format";
 
 export function generateStaticParams() {
@@ -161,9 +162,16 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
         <span className="font-heading text-xl font-light tracking-[-0.01em] text-brand-foreground">
           {formatPrice(listing.price)}
         </span>
-        <Button className="bg-brand-foreground text-brand hover:bg-secondary">
-          Pošlji povpraševanje
-        </Button>
+        <InquiryModal
+          listingSlug={listing.slug}
+          listingTitle={listing.title}
+          sellerName={listing.seller.name}
+          trigger={
+            <Button className="bg-brand-foreground text-brand hover:bg-secondary">
+              Pošlji povpraševanje
+            </Button>
+          }
+        />
       </div>
       <div className="h-20 lg:hidden" aria-hidden="true" />
     </PageShell>
