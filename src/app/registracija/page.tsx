@@ -2,17 +2,24 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export const metadata: Metadata = { title: "Registracija | mobilnahiska.si" };
 
-export default async function RegistracijaPage() {
+export default async function RegistracijaPage(props: PageProps<"/registracija">) {
+  const searchParams = await props.searchParams;
+  const returnTo = safeRedirectPath(
+    typeof searchParams.returnTo === "string" ? searchParams.returnTo : undefined,
+    "/moj-racun"
+  );
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/moj-racun");
+    redirect(returnTo);
   }
 
   return (
@@ -23,7 +30,7 @@ export default async function RegistracijaPage() {
           Registrirajte se, da lahko oddajate oglase in shranjujete priljubljene.
         </p>
         <div className="mt-8 rounded-[14px] border border-border bg-card p-6 shadow-lift">
-          <RegisterForm />
+          <RegisterForm returnTo={returnTo === "/moj-racun" ? undefined : returnTo} />
         </div>
       </div>
     </div>

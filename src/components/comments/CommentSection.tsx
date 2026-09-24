@@ -21,7 +21,10 @@ export async function CommentSection({ articleSlug }: { articleSlug: string }) {
           <CommentForm articleSlug={articleSlug} />
         ) : (
           <p className="rounded-[12px] border border-dashed border-border p-4 text-sm text-muted-foreground">
-            <a href="/prijava" className="font-semibold text-primary hover:underline">
+            <a
+              href={`/prijava?returnTo=${encodeURIComponent(`/vodici/${articleSlug}`)}`}
+              className="font-semibold text-primary hover:underline"
+            >
               Prijavite se
             </a>
             , da lahko komentirate.
