@@ -17,14 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mobilnahiska-next.vercel.app"),
-  title: "mobilnahiska.si: Mobilne in modularne hiške ter zazidljiva zemljišča",
+  metadataBase: new URL("https://www.mobilnahiska.si"),
+  title: "mobilnahiska.si: Mobilne in modularne hiške ter zemljišča",
   description:
-    "Slovenski marketplace za mobilne in modularne hiške ter zazidljiva zemljišča, z oglasi, ponudniki in vodiči na enem mestu.",
-  robots: {
-    index: false,
-    follow: false,
-  },
+    "Slovenski marketplace za mobilne in modularne hiške ter zemljišča, z oglasi, ponudniki in vodiči na enem mestu.",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

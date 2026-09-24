@@ -31,7 +31,7 @@ export default function OpengraphImage() {
             letterSpacing: -0.5,
           }}
         >
-          Mobilne in modularne hiške ter zazidljiva zemljišča
+          Mobilne in modularne hiške ter zemljišča
         </div>
       </div>
     ),
