@@ -595,6 +595,7 @@ export interface Provider {
   slug: string;
   location: string;
   country: Listing["country"];
+  phone: string;
   activeListings: number;
 }
 
@@ -613,6 +614,7 @@ export function getProviders(): Provider[] {
         slug,
         location: listing.seller.location,
         country: listing.seller.country,
+        phone: listing.seller.phone,
         activeListings: 1,
       });
     }

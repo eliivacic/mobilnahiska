@@ -19,7 +19,7 @@ import {
 const NAV_LINKS = [
   { label: "Mobilne hiške", href: "/oglasi?type=mobilna", match: "/oglasi" },
   { label: "Modularne hiše", href: "/oglasi?type=modularna", match: "/oglasi" },
-  { label: "Zazidljiva zemljišča", href: "/zemljisca", match: "/zemljisca" },
+  { label: "Zemljišča", href: "/zemljisca", match: "/zemljisca" },
   { label: "Vodiči", href: "/vodici", match: "/vodici" },
   { label: "Ponudniki", href: "/ponudniki", match: "/ponudniki" },
 ];

@@ -25,7 +25,7 @@ export default function Home() {
           Poiščite svoj novi prostor.
         </h1>
         <p className="mt-2 max-w-xl text-[15px] text-muted-foreground">
-          Mobilne in modularne hiške ter zazidljiva zemljišča na enem mestu.
+          Mobilne in modularne hiške ter zemljišča na enem mestu.
         </p>
 
         <div className="mt-7">
@@ -48,7 +48,7 @@ export default function Home() {
             Izpostavljena ponudba
           </h2>
           <Link
-            href="/oglasi"
+            href="/oglasi?featured=true"
             className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             Vse izpostavljene

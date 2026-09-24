@@ -47,7 +47,7 @@ export default async function AdminPregledPage() {
     { label: "Skupno uporabnikov", value: totalUsers ?? 0, href: "/admin/uporabniki" },
     { label: "Mobilne hiške", value: mobilnaCount, href: "/admin/oglasi" },
     { label: "Modularne hiške", value: modularnaCount, href: "/admin/oglasi" },
-    { label: "Zazidljiva zemljišča", value: lands.length, href: "/admin/zemljisca" },
+    { label: "Zemljišča", value: lands.length, href: "/admin/zemljisca" },
   ];
 
   const secondaryKpis = [

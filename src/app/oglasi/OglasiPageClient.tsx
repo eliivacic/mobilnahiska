@@ -2,6 +2,7 @@
 import { PageShell } from "@/components/layout/PageShell";
 
 import { useMemo, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +19,12 @@ import type { Listing } from "@/types/listing";
 import {
   applyFilters,
   createEmptyFilterState,
+  filterStateFromSearchParams,
+  filterStateToSearchParams,
   isFilterStateEmpty,
+  isSortKey,
   sortListings,
+  validateFilterState,
   type FilterState,
   type SortKey,
 } from "@/lib/filter-listings";
@@ -32,16 +37,41 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "area", label: "Površina" },
 ];
 
-export function OglasiPageClient({
-  allListings,
-  initialFilters,
-}: {
-  allListings: Listing[];
-  initialFilters: FilterState;
-}) {
-  const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const [sort, setSort] = useState<SortKey>("newest");
+export function OglasiPageClient({ allListings }: { allListings: Listing[] }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const filters = useMemo(
+    () =>
+      filterStateFromSearchParams({
+        type: searchParams.get("type") ?? undefined,
+        condition: searchParams.get("condition") ?? undefined,
+        country: searchParams.get("country") ?? undefined,
+        bedrooms: searchParams.get("bedrooms") ?? undefined,
+        priceMin: searchParams.get("priceMin") ?? undefined,
+        priceMax: searchParams.get("priceMax") ?? undefined,
+        areaMin: searchParams.get("areaMin") ?? undefined,
+        areaMax: searchParams.get("areaMax") ?? undefined,
+        yearMin: searchParams.get("yearMin") ?? undefined,
+        yearMax: searchParams.get("yearMax") ?? undefined,
+        delivery: searchParams.get("delivery") ?? undefined,
+        featured: searchParams.get("featured") ?? undefined,
+      }),
+    [searchParams]
+  );
+
+  const sortParam = searchParams.get("sort");
+  const sort: SortKey = isSortKey(sortParam) ? sortParam : "newest";
+
+  function applyState(nextFilters: FilterState, nextSort: SortKey) {
+    const params = filterStateToSearchParams(nextFilters, nextSort);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
+  const validationErrors = useMemo(() => validateFilterState(filters), [filters]);
 
   const results = useMemo(() => {
     return sortListings(applyFilters(allListings, filters), sort);
@@ -49,8 +79,9 @@ export function OglasiPageClient({
 
   const resultCount = results.length;
 
-  const heading =
-    filters.types.size === 1
+  const heading = filters.featuredOnly
+    ? "Izpostavljeni oglasi"
+    : filters.types.size === 1
       ? filters.types.has("mobilna")
         ? "Mobilne hiške naprodaj"
         : "Modularne hiše naprodaj"
@@ -64,6 +95,14 @@ export function OglasiPageClient({
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         Prebrskajte oglase mobilnih in modularnih hišk, novih in rabljenih, po vsej Sloveniji in regiji.
       </p>
+
+      {validationErrors.length > 0 && (
+        <div role="alert" className="mt-4 space-y-1 rounded-[10px] bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+          {validationErrors.map((error) => (
+            <p key={error}>{error}</p>
+          ))}
+        </div>
+      )}
 
       <div className="mt-6 flex items-center justify-between gap-3">
         <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
@@ -83,8 +122,16 @@ export function OglasiPageClient({
               <SheetTitle className="text-left">Filtri</SheetTitle>
             </SheetHeader>
             <div className="px-4 pb-6">
-              <ListingFilters filters={filters} onChange={setFilters} />
-              <Button className="mt-6 w-full bg-brand text-brand-foreground hover:bg-brand-hover" onClick={() => setMobileFiltersOpen(false)}>
+              <ListingFilters
+                filters={filters}
+                onChange={(next) => applyState(next, sort)}
+                onReset={() => applyState(createEmptyFilterState(), "newest")}
+                idPrefix="mobile-"
+              />
+              <Button
+                className="mt-6 w-full bg-brand text-brand-foreground hover:bg-brand-hover"
+                onClick={() => setMobileFiltersOpen(false)}
+              >
                 Prikaži {formatNumber(resultCount)}{" "}
                 {pluralizeSl(resultCount, ["rezultat", "rezultata", "rezultati", "rezultatov"])}
               </Button>
@@ -93,9 +140,11 @@ export function OglasiPageClient({
         </Sheet>
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="hidden text-sm text-muted-foreground sm:inline">Sortiraj:</span>
-          <Select value={sort} onValueChange={(value) => setSort(value as SortKey)}>
-            <SelectTrigger className="w-[190px]">
+          <label htmlFor="oglasi-sort" className="hidden text-sm text-muted-foreground sm:inline">
+            Sortiraj:
+          </label>
+          <Select value={sort} onValueChange={(value) => applyState(filters, value as SortKey)}>
+            <SelectTrigger id="oglasi-sort" className="w-[190px]" aria-label="Razvrsti oglase">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -112,7 +161,7 @@ export function OglasiPageClient({
       <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[288px_1fr]">
         <aside className="hidden lg:block">
           <div className="sticky top-28">
-            <ListingFilters filters={filters} onChange={setFilters} />
+            <ListingFilters filters={filters} onChange={(next) => applyState(next, sort)} onReset={() => applyState(createEmptyFilterState(), "newest")} />
           </div>
         </aside>
 
@@ -120,7 +169,7 @@ export function OglasiPageClient({
           <ListingGrid
             listings={results}
             variant="narrow"
-            onResetFilters={() => setFilters(createEmptyFilterState())}
+            onResetFilters={() => applyState(createEmptyFilterState(), "newest")}
           />
         </div>
       </div>

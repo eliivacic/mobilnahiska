@@ -8,7 +8,7 @@ const columns = [
     links: [
       { label: "Mobilne hiške", href: "/oglasi?type=mobilna" },
       { label: "Modularne hiše", href: "/oglasi?type=modularna" },
-      { label: "Zazidljiva zemljišča", href: "/zemljisca" },
+      { label: "Zemljišča", href: "/zemljisca" },
       { label: "Oddaj oglas", href: "/oddaj-oglas" },
     ],
   },
@@ -41,7 +41,7 @@ export function Footer() {
               <Logo variant="onDark" className="h-16" />
             </Link>
             <p className="mt-3 max-w-xs text-sm text-brand-foreground/70">
-              Slovenski marketplace za mobilne in modularne hiške ter zazidljiva zemljišča.
+              Slovenski marketplace za mobilne in modularne hiške ter zemljišča.
             </p>
           </div>
 

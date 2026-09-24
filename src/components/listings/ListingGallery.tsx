@@ -25,8 +25,8 @@ export function ListingGallery({ images, title }: { images: string[]; title: str
             key={image}
             type="button"
             onClick={() => setActiveIndex(index)}
-            aria-label={`Prikaži fotografijo ${index + 1}`}
-            aria-current={index === activeIndex}
+            aria-label={`Fotografija ${index + 1} od ${images.length}`}
+            aria-pressed={index === activeIndex}
             className={`relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-[4px] bg-muted transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:w-full ${
               index === activeIndex ? "ring-2 ring-brand" : "opacity-75 hover:opacity-100"
             }`}

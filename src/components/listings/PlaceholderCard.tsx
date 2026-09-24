@@ -5,7 +5,7 @@ export function PlaceholderCard() {
   return (
     <Link
       href="/oddaj-oglas"
-      className="group flex flex-col overflow-hidden rounded-[14px] border border-dashed border-border/60 bg-transparent transition-colors hover:border-border hover:bg-secondary/10"
+      className="group flex flex-col overflow-hidden rounded-[14px] border border-dashed border-border/60 bg-transparent transition-colors hover:border-border hover:bg-secondary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <div className="flex aspect-[4/3] w-full items-center justify-center bg-secondary/10">
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary/30 text-muted-foreground">

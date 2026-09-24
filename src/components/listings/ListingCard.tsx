@@ -19,6 +19,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/oglasi/${listing.slug}`}
+      data-testid="listing-card"
       className="group flex h-full flex-col overflow-hidden rounded-[14px] border border-border/60 bg-card shadow-[0_1px_2px_rgba(48,37,33,0.04)] transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-border hover:shadow-[0_8px_20px_-10px_rgba(48,37,33,0.18)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -76,7 +77,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
           </p>
         )}
 
-        <p className="mt-auto pt-1.5 font-heading text-[18px] font-light tracking-[-0.01em] text-foreground sm:text-[22px]">
+        <p
+          data-testid="listing-price"
+          data-price={listing.price}
+          className="mt-auto pt-1.5 font-heading text-[18px] font-light tracking-[-0.01em] text-foreground sm:text-[22px]"
+        >
           {formatPrice(listing.price)}
         </p>
       </div>

@@ -17,8 +17,8 @@ const CATEGORIES = [
     image: CATEGORY_IMAGES.modularna,
   },
   {
-    title: "Zazidljiva zemljišča",
-    description: "Skrbno izbrana zazidljiva zemljišča za vaš naslednji gradbeni projekt.",
+    title: "Zemljišča",
+    description: "Zazidljiva, kmetijska in gozdna zemljišča za vaš naslednji projekt.",
     href: "/zemljisca",
     image: CATEGORY_IMAGES.zemljisce,
   },

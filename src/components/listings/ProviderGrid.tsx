@@ -17,7 +17,7 @@ export function ProviderGrid({ providers }: { providers: Provider[] }) {
         <Link
           key={provider.slug}
           href={`/ponudniki/${provider.slug}`}
-          className="group flex items-center gap-3 rounded-[14px] border border-border/60 bg-card p-4 transition-colors hover:border-border hover:bg-secondary/20"
+          className="group flex items-center gap-3 rounded-[14px] border border-border/60 bg-card p-4 transition-colors hover:border-border hover:bg-secondary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/40 text-lg font-semibold text-brand">
             {provider.name.charAt(0)}
@@ -36,7 +36,7 @@ export function ProviderGrid({ providers }: { providers: Provider[] }) {
         <Link
           key={`placeholder-${index}`}
           href="/cene"
-          className="group flex items-center gap-3 rounded-[14px] border border-dashed border-border/60 p-4 transition-colors hover:border-border hover:bg-secondary/10"
+          className="group flex items-center gap-3 rounded-[14px] border border-dashed border-border/60 p-4 transition-colors hover:border-border hover:bg-secondary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/20 text-muted-foreground">
             <Plus className="h-5 w-5" />

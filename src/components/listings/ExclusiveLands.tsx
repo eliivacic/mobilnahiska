@@ -16,7 +16,7 @@ export function ExclusiveLands({ lands }: { lands: Land[] }) {
               Ekskluzivna ponudba zemljišč
             </h2>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Izbrana zazidljiva zemljišča za vaš naslednji projekt.
+              Izbrana zemljišča za vaš naslednji projekt.
             </p>
           </div>
           <Link

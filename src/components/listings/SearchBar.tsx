@@ -20,7 +20,7 @@ type SearchTab = "mobilna" | "modularna" | "zemljisce";
 const TABS: { value: SearchTab; label: string }[] = [
   { value: "mobilna", label: "Mobilne hiške" },
   { value: "modularna", label: "Modularne hiše" },
-  { value: "zemljisce", label: "Zazidljiva zemljišča" },
+  { value: "zemljisce", label: "Zemljišča" },
 ];
 
 const COUNTRY_OPTIONS: Country[] = ["Slovenija", "Hrvaška", "Italija", "Avstrija", "ostalo"];
@@ -39,8 +39,10 @@ export function SearchBar() {
     event.preventDefault();
     const params = new URLSearchParams();
     if (country !== "vse") params.set("country", country);
-    if (priceMax) params.set("priceMax", priceMax);
-    if (areaMin) params.set("areaMin", areaMin);
+    // Guard against negative values (e.g. pasted in) so a bad search never
+    // silently returns zero results.
+    if (priceMax && Number(priceMax) >= 0) params.set("priceMax", priceMax);
+    if (areaMin && Number(areaMin) >= 0) params.set("areaMin", areaMin);
 
     if (tab === "zemljisce") {
       // Zazidljiva zemljišča still need a real data source — this only
@@ -109,6 +111,8 @@ export function SearchBar() {
             id="search-price"
             type="number"
             inputMode="numeric"
+            min={0}
+            step={100}
             placeholder="brez omejitve"
             value={priceMax}
             onChange={(event) => setPriceMax(event.target.value)}
@@ -124,6 +128,8 @@ export function SearchBar() {
             id="search-area"
             type="number"
             inputMode="numeric"
+            min={0}
+            step={1}
             placeholder="brez omejitve"
             value={areaMin}
             onChange={(event) => setAreaMin(event.target.value)}

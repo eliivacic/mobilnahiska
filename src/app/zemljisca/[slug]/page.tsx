@@ -47,7 +47,7 @@ export default async function LandPage(props: PageProps<"/zemljisca/[slug]">) {
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
         <Link href="/zemljisca" className="hover:text-foreground">
-          Zazidljiva zemljišča
+          Zemljišča
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
         <span className="text-foreground">{land.title}</span>

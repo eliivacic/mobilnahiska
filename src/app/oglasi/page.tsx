@@ -1,39 +1,43 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { listings } from "@/data/listings";
-import { filterStateFromSearchParams } from "@/lib/filter-listings";
 import { OglasiPageClient } from "./OglasiPageClient";
 
-export const metadata: Metadata = {
-  title: "Mobilne hiške naprodaj | mobilnahiska.si",
-  description: "Prebrskajte oglase mobilnih in modularnih hišk, novih in rabljenih, po vsej Sloveniji in regiji.",
+const TITLES: Record<string, string> = {
+  mobilna: "Mobilne hiške naprodaj | mobilnahiska.si",
+  modularna: "Modularne hiše naprodaj | mobilnahiska.si",
 };
 
-export default async function OglasiPage(props: PageProps<"/oglasi">) {
+const DESCRIPTIONS: Record<string, string> = {
+  mobilna: "Prebrskajte oglase mobilnih hišk, novih in rabljenih, po vsej Sloveniji in regiji.",
+  modularna: "Prebrskajte oglase modularnih hiš, novih in rabljenih, po vsej Sloveniji in regiji.",
+};
+
+const DEFAULT_TITLE = "Mobilne in modularne hiške naprodaj | mobilnahiska.si";
+const DEFAULT_DESCRIPTION =
+  "Prebrskajte oglase mobilnih in modularnih hišk, novih in rabljenih, po vsej Sloveniji in regiji.";
+
+export async function generateMetadata(props: PageProps<"/oglasi">): Promise<Metadata> {
   const searchParams = await props.searchParams;
+  const type = typeof searchParams.type === "string" ? searchParams.type : undefined;
+  const canonicalPath = type === "mobilna" || type === "modularna" ? `/oglasi?type=${type}` : "/oglasi";
 
-  const initialFilters = filterStateFromSearchParams({
-    type: typeof searchParams.type === "string" ? searchParams.type : undefined,
-    condition: typeof searchParams.condition === "string" ? searchParams.condition : undefined,
-    priceMax: typeof searchParams.priceMax === "string" ? searchParams.priceMax : undefined,
-    priceMin: typeof searchParams.priceMin === "string" ? searchParams.priceMin : undefined,
-    areaMin: typeof searchParams.areaMin === "string" ? searchParams.areaMin : undefined,
-    areaMax: typeof searchParams.areaMax === "string" ? searchParams.areaMax : undefined,
-    bedroomsMin: typeof searchParams.bedroomsMin === "string" ? searchParams.bedroomsMin : undefined,
-    delivery: typeof searchParams.delivery === "string" ? searchParams.delivery : undefined,
-    country: typeof searchParams.country === "string" ? searchParams.country : undefined,
-  });
+  return {
+    title: (type && TITLES[type]) || DEFAULT_TITLE,
+    description: (type && DESCRIPTIONS[type]) || DEFAULT_DESCRIPTION,
+    alternates: { canonical: canonicalPath },
+    openGraph: {
+      title: (type && TITLES[type]) || DEFAULT_TITLE,
+      description: (type && DESCRIPTIONS[type]) || DEFAULT_DESCRIPTION,
+      url: canonicalPath,
+    },
+  };
+}
 
-  // The header's "Mobilne hiške" / "Modularne hiše" links both point at this
-  // same route with a different `type` query param, so Next.js reuses the
-  // existing client component instance instead of remounting it — without a
-  // key tied to the query string, useState(initialFilters) below would keep
-  // stale filters from the first visit. Forcing a remount here keeps
-  // navigation between these links in sync with the URL, every time.
+export default function OglasiPage() {
   return (
-    <OglasiPageClient
-      key={JSON.stringify(searchParams)}
-      allListings={listings}
-      initialFilters={initialFilters}
-    />
+    <Suspense>
+      <OglasiPageClient allListings={listings} />
+    </Suspense>
   );
 }

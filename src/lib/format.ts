@@ -27,6 +27,21 @@ export function formatDateTimeSl(isoDate: string): string {
   }).format(new Date(isoDate));
 }
 
+// Normalizes a phone number for use in a `tel:` link. Numbers already in
+// international format (starting with "+") are just stripped of whitespace;
+// local Slovenian numbers (starting with a trunk "0") are converted to +386.
+export function normalizePhoneForTel(phone: string): string {
+  const trimmed = phone.trim();
+  if (trimmed.startsWith("+")) {
+    return `+${trimmed.slice(1).replace(/[^0-9]/g, "")}`;
+  }
+  const digits = trimmed.replace(/[^0-9]/g, "");
+  if (digits.startsWith("0")) {
+    return `+386${digits.slice(1)}`;
+  }
+  return `+386${digits}`;
+}
+
 /**
  * Slovenian noun pluralization (1/2/3-4/5+), e.g. forms ["oglas", "oglasa", "oglasi", "oglasov"].
  */
