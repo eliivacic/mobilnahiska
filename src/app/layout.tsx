@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { TopBar } from "@/components/layout/TopBar";
-import { SiteForSaleDialog } from "@/components/layout/SiteForSaleDialog";
+import { ConditionalChrome } from "@/components/layout/ConditionalChrome";
+import { createClient } from "@/lib/supabase/server";
+import { FavoritesProvider } from "@/components/providers/FavoritesProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -18,32 +18,39 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://mobilnahiska-next.vercel.app"),
-  title: "mobilnahiska.si — Mobilne in modularne hiške naprodaj",
+  title: "mobilnahiska.si: Mobilne in modularne hiške ter zazidljiva zemljišča",
   description:
-    "Slovenski marketplace za nakup in prodajo mobilnih hišk, modularnih hiš, novih in rabljenih ponudb.",
+    "Slovenski marketplace za mobilne in modularne hiške ter zazidljiva zemljišča, z oglasi, ponudniki in vodiči na enem mestu.",
   robots: {
     index: false,
     follow: false,
   },
 };
 
-// Temporary "site for sale" messaging while the domain is on the market.
-// Set NEXT_PUBLIC_SHOW_SALE_BANNER=false in the environment to turn it off
-// for a normal production launch without touching this file again.
-const SHOW_SALE_BANNER = process.env.NEXT_PUBLIC_SHOW_SALE_BANNER !== "false";
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    isAdmin = profile?.role === "admin";
+  }
+
   return (
     <html
       lang="sl"
       className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        {SHOW_SALE_BANNER && <TopBar />}
-        <Header />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
-        {SHOW_SALE_BANNER && <SiteForSaleDialog />}
+        <FavoritesProvider>
+          <ConditionalChrome userEmail={user?.email} isAdmin={isAdmin}>
+            {children}
+          </ConditionalChrome>
+        </FavoritesProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
