@@ -6,7 +6,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function OpengraphImage() {
-  const logoBuffer = readFileSync(join(process.cwd(), "public", "logo-white.png"));
+  const logoBuffer = readFileSync(join(process.cwd(), "public", "logo-mark.png"));
   const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 
   return new ImageResponse(
@@ -19,19 +19,19 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#1E2749",
+          backgroundColor: "#5A3026",
         }}
       >
-        <img src={logoSrc} width={640} height={213} alt="" />
+        <img src={logoSrc} width={560} height={310} alt="" />
         <div
           style={{
-            marginTop: 28,
+            marginTop: 20,
             fontSize: 32,
-            color: "#E4D9FF",
+            color: "#DDE8D9",
             letterSpacing: -0.5,
           }}
         >
-          Mobilne in modularne hiške naprodaj
+          Mobilne in modularne hiške ter zazidljiva zemljišča
         </div>
       </div>
     ),

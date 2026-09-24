@@ -8,7 +8,7 @@ export function ListingGallery({ images, title }: { images: string[]; title: str
 
   return (
     <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_180px]">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[8px] bg-muted shadow-lift lg:aspect-[16/11]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[14px] bg-muted shadow-lift lg:aspect-[16/11]">
         <Image
           src={images[activeIndex]}
           alt={title}

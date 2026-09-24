@@ -11,7 +11,7 @@ export function ListingInquiryBox({ listing }: { listing: Listing }) {
   const [showPhone, setShowPhone] = useState(false);
 
   return (
-    <div className="rounded-[8px] border border-border bg-card p-5 shadow-lift">
+    <div className="rounded-[14px] border border-border bg-card p-5 shadow-lift">
       <span className="font-heading text-3xl font-light tracking-[-0.01em] text-foreground">
         {formatPrice(listing.price)}
       </span>

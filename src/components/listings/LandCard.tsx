@@ -2,29 +2,26 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Truck } from "lucide-react";
-import type { Listing } from "@/types/listing";
+import { Heart, Plug } from "lucide-react";
+import type { Land } from "@/types/land";
+import { LAND_TYPE_LABELS } from "@/types/land";
 import { formatPrice } from "@/lib/format";
 import { useFavorites } from "@/components/providers/FavoritesProvider";
 
-export function ListingCard({ listing }: { listing: Listing }) {
+export function LandCard({ land }: { land: Land }) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const favorite = isFavorite("listing", listing.slug);
-  const badgeLabel = listing.featured
-    ? "Izpostavljeno"
-    : listing.condition === "nova"
-      ? "Nova"
-      : "Rabljena";
+  const favorite = isFavorite("land", land.slug);
+  const badgeLabel = land.exclusive ? "Ekskluzivno" : LAND_TYPE_LABELS[land.type];
 
   return (
     <Link
-      href={`/oglasi/${listing.slug}`}
+      href={`/zemljisca/${land.slug}`}
       className="group flex h-full flex-col overflow-hidden rounded-[14px] border border-border/60 bg-card shadow-[0_1px_2px_rgba(48,37,33,0.04)] transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-border hover:shadow-[0_8px_20px_-10px_rgba(48,37,33,0.18)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         <Image
-          src={listing.images[0]}
-          alt={listing.title}
+          src={land.images[0]}
+          alt={land.title}
           fill
           sizes="(min-width: 1280px) 23vw, (min-width: 768px) 31vw, 90vw"
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02]"
@@ -33,9 +30,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <div className="absolute left-2.5 top-2.5">
           <span
             className={`rounded-[4px] px-2 py-1 text-[11px] font-semibold tracking-wide ${
-              listing.featured
-                ? "bg-brand text-brand-foreground"
-                : "bg-background/95 text-foreground"
+              land.exclusive ? "bg-brand text-brand-foreground" : "bg-background/95 text-foreground"
             }`}
           >
             {badgeLabel.toUpperCase()}
@@ -46,7 +41,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
           type="button"
           onClick={(event) => {
             event.preventDefault();
-            toggleFavorite("listing", listing.slug);
+            toggleFavorite("land", land.slug);
           }}
           aria-label={favorite ? "Odstrani iz priljubljenih" : "Dodaj med priljubljene"}
           aria-pressed={favorite}
@@ -57,27 +52,24 @@ export function ListingCard({ listing }: { listing: Listing }) {
       </div>
 
       <div className="flex flex-1 flex-col space-y-1 p-3.5">
-        <h3 className="truncate text-[15px] font-semibold text-foreground">{listing.title}</h3>
-        <p className="truncate text-[13px] text-muted-foreground">{listing.manufacturer}</p>
+        <h3 className="truncate text-[15px] font-semibold text-foreground">{land.title}</h3>
+        <p className="truncate text-[13px] text-muted-foreground">{LAND_TYPE_LABELS[land.type]}</p>
+        <p className="truncate text-[13px] text-muted-foreground">{land.area} m²</p>
         <p className="truncate text-[13px] text-muted-foreground">
-          {listing.area} m² &middot; {listing.bedrooms}{" "}
-          {listing.bedrooms === 1 ? "spalnica" : "spalnice"} &middot; {listing.year}
-        </p>
-        <p className="truncate text-[13px] text-muted-foreground">
-          {listing.location}, {listing.country}
+          {land.location}, {land.country}
         </p>
 
-        {listing.deliveryAvailable && (
+        {land.utilitiesAvailable && (
           <p className="pt-0.5">
             <span className="inline-flex items-center gap-1 rounded-[4px] bg-secondary px-2 py-1 text-[11px] font-medium text-primary">
-              <Truck className="h-3.5 w-3.5 shrink-0" />
-              Dostava možna
+              <Plug className="h-3.5 w-3.5 shrink-0" />
+              Vsi priključki
             </span>
           </p>
         )}
 
         <p className="mt-auto pt-1.5 font-heading text-[18px] font-light tracking-[-0.01em] text-foreground sm:text-[22px]">
-          {formatPrice(listing.price)}
+          {formatPrice(land.price)}
         </p>
       </div>
     </Link>

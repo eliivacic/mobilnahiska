@@ -28,6 +28,28 @@ const INTERIOR_IDS = [
   "1704018924280-96d1ab64d213",
 ];
 
+export const CATEGORY_IMAGES = {
+  mobilna: UNSPLASH(EXTERIOR_IDS[0], 1200, 900),
+  modularna: UNSPLASH(EXTERIOR_IDS[2], 1200, 900),
+  zemljisce: UNSPLASH(EXTERIOR_IDS[7], 1200, 900),
+};
+
+export const GUIDE_IMAGES = [
+  UNSPLASH(EXTERIOR_IDS[5], 1400, 900),
+  UNSPLASH(EXTERIOR_IDS[8], 1400, 900),
+  UNSPLASH(EXTERIOR_IDS[11], 1400, 900),
+  UNSPLASH(EXTERIOR_IDS[6], 1400, 900),
+];
+
+// Zazidljiva zemljišča don't have their own photography yet — reusing
+// verified exterior shots as stand-ins for test/placeholder listings.
+export const LAND_IMAGES = [
+  UNSPLASH(EXTERIOR_IDS[4], 1400, 1000),
+  UNSPLASH(EXTERIOR_IDS[9], 1400, 1000),
+  UNSPLASH(EXTERIOR_IDS[13], 1400, 1000),
+  UNSPLASH(EXTERIOR_IDS[1], 1400, 1000),
+];
+
 export function listingGallery(index: number, count = 5): string[] {
   const ext = (offset: number) =>
     UNSPLASH(EXTERIOR_IDS[(index + offset) % EXTERIOR_IDS.length], 1400, 1000);

@@ -18,7 +18,7 @@ export function ListingSpecs({ listing }: { listing: Listing }) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-4 rounded-[4px] border border-border p-4 sm:grid-cols-6">
+    <div className="grid grid-cols-3 gap-4 rounded-[12px] border border-border p-4 sm:grid-cols-6">
       {specs.map((spec) => (
         <div key={spec.label} className="flex flex-col items-center gap-1.5 text-center">
           <spec.icon className="h-5 w-5 text-brand" />

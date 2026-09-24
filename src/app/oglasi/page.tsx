@@ -20,7 +20,20 @@ export default async function OglasiPage(props: PageProps<"/oglasi">) {
     areaMax: typeof searchParams.areaMax === "string" ? searchParams.areaMax : undefined,
     bedroomsMin: typeof searchParams.bedroomsMin === "string" ? searchParams.bedroomsMin : undefined,
     delivery: typeof searchParams.delivery === "string" ? searchParams.delivery : undefined,
+    country: typeof searchParams.country === "string" ? searchParams.country : undefined,
   });
 
-  return <OglasiPageClient allListings={listings} initialFilters={initialFilters} />;
+  // The header's "Mobilne hiške" / "Modularne hiše" links both point at this
+  // same route with a different `type` query param, so Next.js reuses the
+  // existing client component instance instead of remounting it — without a
+  // key tied to the query string, useState(initialFilters) below would keep
+  // stale filters from the first visit. Forcing a remount here keeps
+  // navigation between these links in sync with the URL, every time.
+  return (
+    <OglasiPageClient
+      key={JSON.stringify(searchParams)}
+      allListings={listings}
+      initialFilters={initialFilters}
+    />
+  );
 }

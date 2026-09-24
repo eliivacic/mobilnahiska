@@ -1,62 +1,53 @@
 import Link from "next/link";
-import Image from "next/image";
+import { Logo } from "@/components/layout/Logo";
+import { PageShell } from "@/components/layout/PageShell";
 
 const columns = [
   {
-    title: "Marketplace",
+    title: "Oglasi",
     links: [
       { label: "Mobilne hiške", href: "/oglasi?type=mobilna" },
       { label: "Modularne hiše", href: "/oglasi?type=modularna" },
-      { label: "Nove hiške", href: "/oglasi?condition=nova" },
-      { label: "Rabljene hiške", href: "/oglasi?condition=rabljena" },
+      { label: "Zazidljiva zemljišča", href: "/zemljisca" },
+      { label: "Oddaj oglas", href: "/oddaj-oglas" },
     ],
   },
   {
-    title: "Podjetje",
+    title: "Portal",
     links: [
       { label: "Ponudniki", href: "/ponudniki" },
-      { label: "Vodiči", href: "/vodici" },
-      { label: "Oddaj oglas", href: "/oddaj-oglas" },
-      { label: "Cenik / Paketi za ponudnike", href: "/cene" },
+      { label: "Od parcele do hiške", href: "/vodici" },
+      { label: "Paketi in cenik", href: "/cene" },
+      { label: "Kontakt", href: "mailto:info@mobilnahiska.si" },
     ],
   },
   {
-    title: "Pravno",
+    title: "Informacije",
     links: [
       { label: "Pogoji uporabe", href: "/pogoji" },
-      { label: "Zasebnost", href: "/zasebnost" },
+      { label: "Politika zasebnosti", href: "/zasebnost" },
       { label: "Piškotki", href: "/piskotki" },
     ],
-  },
-  {
-    title: "Kontakt",
-    links: [{ label: "info@mobilnahiska.si", href: "mailto:info@mobilnahiska.si" }],
   },
 ];
 
 export function Footer() {
   return (
     <footer className="bg-brand">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-5">
+      <PageShell className="py-12">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="flex items-center">
-              <Image
-                src="/logo-white.png"
-                alt="mobilnahiska.si"
-                width={2172}
-                height={724}
-                className="h-16 w-auto"
-              />
+              <Logo variant="onDark" className="h-16" />
             </Link>
-            <p className="mt-3 max-w-xs text-sm text-brand-foreground/60">
-              Marketplace za mobilne in modularne hiške v Sloveniji in regiji.
+            <p className="mt-3 max-w-xs text-sm text-brand-foreground/70">
+              Slovenski marketplace za mobilne in modularne hiške ter zazidljiva zemljišča.
             </p>
           </div>
 
           {columns.map((column) => (
             <div key={column.title}>
-              <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-foreground/50">
+              <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-foreground/60">
                 {column.title}
               </h3>
               <ul className="mt-3 space-y-2">
@@ -64,7 +55,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-brand-foreground/70 transition-colors hover:text-brand-foreground"
+                      className="text-sm text-brand-foreground/80 transition-colors hover:text-brand-foreground"
                     >
                       {link.label}
                     </Link>
@@ -75,10 +66,10 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 text-sm text-brand-foreground/50 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-brand-foreground/15 pt-6 text-sm text-brand-foreground/60 sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} mobilnahiska.si. Vse pravice pridržane.</p>
         </div>
-      </div>
+      </PageShell>
     </footer>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageShell } from "@/components/layout/PageShell";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check, ChevronRight, MapPin } from "lucide-react";
@@ -53,7 +54,7 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="py-8">
       <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground">
           Domov
@@ -132,12 +133,12 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
 
           <section>
             <h2 className="font-heading text-[21px] font-light tracking-[-0.01em] text-foreground">Lokacija</h2>
-            <div className="mt-3 flex items-start gap-3 rounded-[4px] border border-border p-4">
+            <div className="mt-3 flex items-start gap-3 rounded-[12px] border border-border p-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/40">
                 <MapPin className="h-5 w-5 text-brand" />
               </div>
               <p className="text-sm leading-relaxed text-foreground/90">
-                {listing.location}, {listing.country} &mdash; točen naslov je na voljo po dogovoru s
+                {listing.location}, {listing.country}. Točen naslov je na voljo po dogovoru s
                 prodajalcem.
               </p>
             </div>
@@ -151,7 +152,7 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
           </section>
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:h-fit">
+        <aside className="lg:sticky lg:top-28 lg:h-fit">
           <ListingInquiryBox listing={listing} />
         </aside>
       </div>
@@ -165,6 +166,6 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
         </Button>
       </div>
       <div className="h-20 lg:hidden" aria-hidden="true" />
-    </div>
+    </PageShell>
   );
 }

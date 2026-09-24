@@ -55,6 +55,9 @@ export function filterStateFromSearchParams(
     }
   }
   if (params.delivery === "true") state.deliveryOnly = true;
+  if (params.country) {
+    state.countries.add(params.country as Country);
+  }
 
   return state;
 }

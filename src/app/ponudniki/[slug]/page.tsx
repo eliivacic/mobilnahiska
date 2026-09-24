@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageShell } from "@/components/layout/PageShell";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
@@ -30,7 +31,7 @@ export default async function ProviderPage(props: PageProps<"/ponudniki/[slug]">
   const providerListings = getListingsByProviderSlug(slug);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell className="py-8">
       <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground">
           Domov
@@ -61,6 +62,6 @@ export default async function ProviderPage(props: PageProps<"/ponudniki/[slug]">
       <div className="mt-8">
         <ListingGrid listings={providerListings} />
       </div>
-    </div>
+    </PageShell>
   );
 }

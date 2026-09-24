@@ -124,7 +124,7 @@ export function ListingFilters({ filters, onChange }: ListingFiltersProps) {
                 key={count}
                 type="button"
                 onClick={() => update({ bedrooms: toggleInSet(filters.bedrooms, count) })}
-                className={`flex h-9 min-w-9 items-center justify-center rounded-[4px] border px-2.5 text-sm font-medium transition-colors ${
+                className={`flex h-9 min-w-9 items-center justify-center rounded-[8px] border px-2.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.97] ${
                   active
                     ? "border-brand bg-brand text-brand-foreground"
                     : "border-border text-foreground hover:border-foreground/40"

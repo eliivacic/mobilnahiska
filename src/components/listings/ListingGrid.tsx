@@ -3,20 +3,24 @@ import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { Button } from "@/components/ui/button";
 
+const VARIANT_CLASSES = {
+  default: "grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4",
+  narrow: "grid grid-cols-2 gap-4 md:grid-cols-3",
+  spacious: "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6",
+} as const;
+
 export function ListingGrid({
   listings,
-  dense = false,
-  spacious = false,
+  variant = "default",
   onResetFilters,
 }: {
   listings: Listing[];
-  dense?: boolean;
-  spacious?: boolean;
+  variant?: keyof typeof VARIANT_CLASSES;
   onResetFilters?: () => void;
 }) {
   if (listings.length === 0) {
     return (
-      <div className="flex flex-col items-center rounded-[6px] border border-dashed border-border py-20 text-center">
+      <div className="flex flex-col items-center rounded-[14px] border border-dashed border-border py-20 text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/40">
           <SearchX className="h-5 w-5 text-brand" />
         </div>
@@ -36,13 +40,7 @@ export function ListingGrid({
   }
 
   return (
-    <div
-      className={
-        spacious
-          ? "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6"
-          : `grid grid-cols-2 gap-4 md:grid-cols-3 ${dense ? "lg:grid-cols-4 xl:grid-cols-5" : "lg:grid-cols-4"}`
-      }
-    >
+    <div className={VARIANT_CLASSES[variant]}>
       {listings.map((listing) => (
         <ListingCard key={listing.id} listing={listing} />
       ))}
