@@ -5,6 +5,11 @@
 # Claude Code local skills (installed via `npx skills add`, not app code)
 .claude/
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # dependencies
 /node_modules
 
