@@ -206,6 +206,14 @@ export async function submitListingSubmission(
     .single();
 
   if (error) {
+    // The application-level check above (checkActiveListingLimit) catches
+    // this in the common case with a friendlier message — this only fires
+    // if two submissions from the same user raced each other past that
+    // check (closed at the database level by a trigger, see
+    // supabase/migrations for enforce_active_listing_limit).
+    if (error.message?.includes("active_listing_limit_exceeded")) {
+      return { error: "Dosegli ste omejitev vašega paketa za število aktivnih oglasov. Poskusite znova čez trenutek." };
+    }
     return { error: "Oglasa ni bilo mogoče oddati. Poskusite znova." };
   }
 
