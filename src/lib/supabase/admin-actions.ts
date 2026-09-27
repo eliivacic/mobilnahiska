@@ -41,35 +41,83 @@ export async function deleteComment(commentId: string) {
   revalidatePath("/vodici", "layout");
 }
 
-export async function updatePlan(
-  planId: string,
-  data: { priceCents: number; maxActiveListings: number; isActive: boolean }
-) {
+export interface UpdatePlanInput {
+  name: string;
+  priceCents: number;
+  maxActiveListings: number | null;
+  description: string;
+  features: string[];
+  isActive: boolean;
+  isFeatured: boolean;
+  ctaLabel: string;
+  durationDays: number | null;
+}
+
+export async function updatePlan(planId: string, data: UpdatePlanInput) {
   const { user } = await requireAdmin();
   const admin = createAdminClient();
   const { data: before } = await admin
     .from("plans")
-    .select("price_cents, max_active_listings, is_active")
+    .select("name, price_cents, max_active_listings, description, features, is_active, is_featured, cta_label, duration_days")
     .eq("id", planId)
     .single();
-  await admin
-    .from("plans")
-    .update({
-      price_cents: data.priceCents,
-      max_active_listings: data.maxActiveListings,
-      is_active: data.isActive,
-    })
-    .eq("id", planId);
+
+  const after = {
+    name: data.name,
+    price_cents: data.priceCents,
+    max_active_listings: data.maxActiveListings,
+    description: data.description || null,
+    features: data.features,
+    is_active: data.isActive,
+    is_featured: data.isFeatured,
+    cta_label: data.ctaLabel || null,
+    duration_days: data.durationDays,
+  };
+
+  await admin.from("plans").update(after).eq("id", planId);
   await logAdminAction({
     adminId: user.id,
     action: "plan.update",
     entityType: "plan",
     entityId: planId,
     before,
-    after: { price_cents: data.priceCents, max_active_listings: data.maxActiveListings, is_active: data.isActive },
+    after,
   });
   revalidatePath("/admin/paketi");
   revalidatePath("/moj-racun/paket");
+  revalidatePath("/cene");
+}
+
+export async function updatePromotionAddon(
+  addonId: string,
+  data: { priceCents: number; durationDays: number; isActive: boolean }
+) {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from("promotion_addons")
+    .select("price_cents, duration_days, is_active")
+    .eq("id", addonId)
+    .single();
+
+  const after = {
+    price_cents: data.priceCents,
+    duration_days: data.durationDays,
+    is_active: data.isActive,
+    updated_at: new Date().toISOString(),
+  };
+
+  await admin.from("promotion_addons").update(after).eq("id", addonId);
+  await logAdminAction({
+    adminId: user.id,
+    action: "promotion_addon.update",
+    entityType: "promotion_addon",
+    entityId: addonId,
+    before,
+    after,
+  });
+  revalidatePath("/admin/paketi");
+  revalidatePath("/cene");
 }
 
 export async function updateUserRole(userId: string, role: "user" | "dealer" | "admin") {

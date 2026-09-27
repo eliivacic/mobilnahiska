@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
+import { formatPlanPrice, type Plan } from "@/types/pricing";
 
 export const metadata: Metadata = { title: "Moj paket | mobilnahiska.si" };
-
-interface PlanRow {
-  id: string;
-  name: string;
-  price_cents: number;
-  billing_period: string;
-  max_active_listings: number;
-  description: string | null;
-}
 
 export default async function MojPaketPage() {
   const supabase = await createClient();
@@ -29,10 +22,11 @@ export default async function MojPaketPage() {
   const { data: allPlans } = await supabase
     .from("plans")
     .select("*")
+    .eq("is_active", true)
     .order("price_cents", { ascending: true });
 
   const plan = (Array.isArray(subscription?.plans) ? subscription?.plans[0] : subscription?.plans) as
-    | PlanRow
+    | Plan
     | undefined;
 
   return (
@@ -44,15 +38,13 @@ export default async function MojPaketPage() {
         <p className="font-heading text-2xl font-light tracking-[-0.01em] text-foreground">
           {plan?.name ?? "Brezplačen"}
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {plan && plan.price_cents > 0
-            ? `${(plan.price_cents / 100).toFixed(0)} € / mesec`
-            : "0 € / mesec"}
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{plan ? formatPlanPrice(plan) : "0 € / mesec"}</p>
         <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div>
             <dt className="text-muted-foreground">Aktivni oglasi</dt>
-            <dd className="mt-0.5 font-medium text-foreground">0 / {plan?.max_active_listings ?? 1}</dd>
+            <dd className="mt-0.5 font-medium text-foreground">
+              0 / {plan?.max_active_listings === null ? "neomejeno" : (plan?.max_active_listings ?? 1)}
+            </dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Naslednje plačilo</dt>
@@ -68,8 +60,8 @@ export default async function MojPaketPage() {
           <h2 className="text-[13px] font-semibold uppercase tracking-wide text-foreground/70">
             Razpoložljivi paketi
           </h2>
-          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {allPlans.map((option) => (
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {(allPlans as Plan[]).map((option) => (
               <div
                 key={option.id}
                 className={`rounded-[14px] border p-4 ${
@@ -78,12 +70,19 @@ export default async function MojPaketPage() {
               >
                 <p className="font-semibold text-foreground">{option.name}</p>
                 <p className="mt-1 font-heading text-xl font-light tracking-[-0.01em] text-foreground">
-                  {option.price_cents === 0 ? "Brezplačno" : `${(option.price_cents / 100).toFixed(0)} €/mes.`}
+                  {formatPlanPrice(option)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">{option.description}</p>
               </div>
             ))}
           </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Poln pregled funkcij posameznega paketa je na voljo na{" "}
+            <Link href="/cene" className="font-medium text-primary hover:underline">
+              strani s ceniki
+            </Link>
+            .
+          </p>
         </div>
       )}
 
