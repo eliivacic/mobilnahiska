@@ -181,35 +181,55 @@ export default async function AdminNastavitvePage() {
             {!emailLog || emailLog.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">Še ni zabeleženih e-poštnih obvestil.</p>
             ) : (
-              <div className="mt-3 overflow-hidden rounded-[10px] border border-border">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-muted/60 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2">Tip</th>
-                      <th className="px-3 py-2">Prejemnik</th>
-                      <th className="px-3 py-2">Stanje</th>
-                      <th className="px-3 py-2">Datum</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {emailLog.map((row, index) => {
-                      const status = EMAIL_STATUS_LABELS[row.status] ?? EMAIL_STATUS_LABELS.skipped_no_provider;
-                      return (
-                        <tr key={index} className="border-t border-border">
-                          <td className="px-3 py-2 text-foreground">{row.email_type}</td>
-                          <td className="px-3 py-2 text-muted-foreground">{row.recipient_email}</td>
-                          <td className="px-3 py-2">
-                            <span className={`rounded-[4px] px-2 py-0.5 text-[11px] font-semibold ${status.className}`}>
-                              {status.label}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">{formatDateTimeSl(row.created_at)}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <>
+                <div className="mt-3 hidden overflow-hidden rounded-[10px] border border-border md:block">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-muted/60 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr>
+                        <th className="px-3 py-2">Tip</th>
+                        <th className="px-3 py-2">Prejemnik</th>
+                        <th className="px-3 py-2">Stanje</th>
+                        <th className="px-3 py-2">Datum</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {emailLog.map((row, index) => {
+                        const status = EMAIL_STATUS_LABELS[row.status] ?? EMAIL_STATUS_LABELS.skipped_no_provider;
+                        return (
+                          <tr key={index} className="border-t border-border">
+                            <td className="px-3 py-2 text-foreground">{row.email_type}</td>
+                            <td className="px-3 py-2 text-muted-foreground">{row.recipient_email}</td>
+                            <td className="px-3 py-2">
+                              <span className={`rounded-[4px] px-2 py-0.5 text-[11px] font-semibold ${status.className}`}>
+                                {status.label}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-muted-foreground">{formatDateTimeSl(row.created_at)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-3 space-y-2 md:hidden">
+                  {emailLog.map((row, index) => {
+                    const status = EMAIL_STATUS_LABELS[row.status] ?? EMAIL_STATUS_LABELS.skipped_no_provider;
+                    return (
+                      <div key={index} className="rounded-[10px] border border-border bg-card p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground">{row.email_type}</p>
+                          <span className={`shrink-0 rounded-[4px] px-2 py-0.5 text-[11px] font-semibold ${status.className}`}>
+                            {status.label}
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{row.recipient_email}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{formatDateTimeSl(row.created_at)}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </TabsContent>

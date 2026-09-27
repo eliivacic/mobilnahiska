@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PhotoUploader } from "@/components/listings/PhotoUploader";
 import { updateListingSubmission, type SubmitListingState } from "@/lib/supabase/listing-submissions";
 
 const initialState: SubmitListingState = {};
@@ -29,14 +30,17 @@ export interface EditListingDefaults {
   capacity: string;
   deliveryAvailable: boolean;
   utilitiesAvailable: boolean;
+  photoUrls: string[];
 }
 
 export function EditListingForm({
   submissionId,
+  userId,
   isHouseType,
   defaults,
 }: {
   submissionId: string;
+  userId: string;
   isHouseType: boolean;
   defaults: EditListingDefaults;
 }) {
@@ -44,11 +48,19 @@ export function EditListingForm({
   const [state, formAction, pending] = useActionState(action, initialState);
 
   const [fields, setFields] = useState(defaults);
+  const [photoUrls, setPhotoUrls] = useState<string[]>(defaults.photoUrls);
   const set = <K extends keyof EditListingDefaults>(key: K, value: EditListingDefaults[K]) =>
     setFields((prev) => ({ ...prev, [key]: value }));
 
   return (
     <form action={formAction} className="max-w-xl space-y-4">
+      <input type="hidden" name="photoUrls" value={JSON.stringify(photoUrls)} />
+
+      <div className="space-y-1.5">
+        <Label>Fotografije</Label>
+        <PhotoUploader userId={userId} photoUrls={photoUrls} onChange={setPhotoUrls} />
+      </div>
+
       <div className="space-y-1.5">
         <Label htmlFor="title">Naslov</Label>
         <Input id="title" name="title" value={fields.title} onChange={(e) => set("title", e.target.value)} required />

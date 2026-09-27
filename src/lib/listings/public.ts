@@ -40,13 +40,24 @@ type SubmissionRow = {
   features: string[] | null;
   photo_urls: string[];
   is_top: boolean;
+  top_until: string | null;
   is_featured_homepage: boolean;
+  featured_until: string | null;
   is_exclusive: boolean;
   created_at: string;
 };
 
 const PUBLISHED_SELECT =
-  "id, user_id, type, title, slug, description, price, location, country, contact_name, contact_phone, contact_email, condition, manufacturer, year, area, length, width, bedrooms, bathrooms, capacity, delivery_available, land_type, utilities_available, features, photo_urls, is_top, is_featured_homepage, is_exclusive, created_at";
+  "id, user_id, type, title, slug, description, price, location, country, contact_name, contact_phone, contact_email, condition, manufacturer, year, area, length, width, bedrooms, bathrooms, capacity, delivery_available, land_type, utilities_available, features, photo_urls, is_top, top_until, is_featured_homepage, featured_until, is_exclusive, created_at";
+
+// is_top/is_featured_homepage are set true once at payment time and never
+// flipped back automatically — top_until/featured_until (also set at
+// payment time, from the addon's duration_days) are the actual source of
+// truth for whether the promotion is still active. Without checking these,
+// a TOP/featured purchase would display as promoted forever.
+function isPromotionActive(until: string | null): boolean {
+  return until === null || new Date(until) > new Date();
+}
 
 function isCountry(value: string): value is Country {
   return value === "Slovenija" || value === "Hrvaška" || value === "Italija" || value === "Avstrija" || value === "ostalo";
@@ -71,7 +82,7 @@ function toListing(row: SubmissionRow, sellerIsDealer: boolean): Listing {
     location: row.location,
     country: isCountry(row.country) ? row.country : "ostalo",
     deliveryAvailable: Boolean(row.delivery_available),
-    featured: row.is_top,
+    featured: row.is_top && isPromotionActive(row.top_until),
     description: row.description,
     features: row.features ?? [],
     images: row.photo_urls,
@@ -209,6 +220,7 @@ export async function getHomepageFeaturedListings(count = 8): Promise<Listing[]>
     .eq("is_featured_homepage", true)
     .in("type", ["mobilna", "modularna"])
     .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+    .or(`featured_until.is.null,featured_until.gt.${nowIso}`)
     .order("created_at", { ascending: false })
     .limit(count)
     .returns<SubmissionRow[]>();

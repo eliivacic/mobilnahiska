@@ -32,6 +32,22 @@ export default async function MojPaketPage() {
     | undefined;
   const stripeReady = isStripeConfigured();
 
+  const nowIso = new Date().toISOString();
+  const [{ count: publishedCount }, { count: pendingCount }] = await Promise.all([
+    supabase
+      .from("listing_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user!.id)
+      .eq("status", "published")
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`),
+    supabase
+      .from("listing_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user!.id)
+      .eq("status", "pending_review"),
+  ]);
+  const activeListingCount = (publishedCount ?? 0) + (pendingCount ?? 0);
+
   return (
     <div>
       <h1 className="font-heading text-2xl font-light tracking-[-0.01em] text-foreground">Moj paket</h1>
@@ -46,7 +62,7 @@ export default async function MojPaketPage() {
           <div>
             <dt className="text-muted-foreground">Aktivni oglasi</dt>
             <dd className="mt-0.5 font-medium text-foreground">
-              0 / {plan?.max_active_listings === null ? "neomejeno" : (plan?.max_active_listings ?? 1)}
+              {activeListingCount} / {plan?.max_active_listings === null ? "neomejeno" : (plan?.max_active_listings ?? 1)}
             </dd>
           </div>
           <div>

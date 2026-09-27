@@ -95,44 +95,73 @@ export default async function AdminPlacilaPage(props: PageProps<"/admin/placila"
           </p>
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-[14px] border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/60 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Datum</th>
-                <th className="px-4 py-3">Uporabnik</th>
-                <th className="px-4 py-3">Produkt</th>
-                <th className="px-4 py-3">Znesek</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Ponudnik</th>
-                <th className="px-4 py-3">Transaction ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((payment) => (
-                <tr key={payment.id} className="border-t border-border">
-                  <td className="px-4 py-3 text-muted-foreground">{formatDateTimeSl(payment.created_at)}</td>
-                  <td className="px-4 py-3 text-foreground">{nameById.get(payment.user_id) || "—"}</td>
-                  <td className="px-4 py-3 text-foreground">{PRODUCT_TYPE_LABELS[payment.product_type]}</td>
-                  <td className="px-4 py-3 font-medium text-foreground">
-                    {new Intl.NumberFormat("sl-SI", { style: "currency", currency: payment.currency.toUpperCase() }).format(
-                      payment.amount_cents / 100
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-[6px] px-2.5 py-1 text-xs font-semibold ${STATUS_BADGE[payment.status]}`}>
-                      {PAYMENT_STATUS_LABELS[payment.status]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{payment.provider}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {payment.provider_transaction_id || "—"}
-                  </td>
+        <>
+          <div className="mt-6 hidden overflow-hidden rounded-[14px] border border-border md:block">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/60 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Datum</th>
+                  <th className="px-4 py-3">Uporabnik</th>
+                  <th className="px-4 py-3">Produkt</th>
+                  <th className="px-4 py-3">Znesek</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Ponudnik</th>
+                  <th className="px-4 py-3">Transaction ID</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((payment) => (
+                  <tr key={payment.id} className="border-t border-border">
+                    <td className="px-4 py-3 text-muted-foreground">{formatDateTimeSl(payment.created_at)}</td>
+                    <td className="px-4 py-3 text-foreground">{nameById.get(payment.user_id) || "—"}</td>
+                    <td className="px-4 py-3 text-foreground">{PRODUCT_TYPE_LABELS[payment.product_type]}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {new Intl.NumberFormat("sl-SI", { style: "currency", currency: payment.currency.toUpperCase() }).format(
+                        payment.amount_cents / 100
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-[6px] px-2.5 py-1 text-xs font-semibold ${STATUS_BADGE[payment.status]}`}>
+                        {PAYMENT_STATUS_LABELS[payment.status]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{payment.provider}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      {payment.provider_transaction_id || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 space-y-3 md:hidden">
+            {rows.map((payment) => (
+              <div key={payment.id} className="rounded-[14px] border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-foreground">{nameById.get(payment.user_id) || "—"}</p>
+                    <p className="text-sm text-muted-foreground">{PRODUCT_TYPE_LABELS[payment.product_type]}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-[6px] px-2.5 py-1 text-xs font-semibold ${STATUS_BADGE[payment.status]}`}>
+                    {PAYMENT_STATUS_LABELS[payment.status]}
+                  </span>
+                </div>
+                <p className="mt-2 font-heading text-lg font-light tracking-[-0.01em] text-foreground">
+                  {new Intl.NumberFormat("sl-SI", { style: "currency", currency: payment.currency.toUpperCase() }).format(
+                    payment.amount_cents / 100
+                  )}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatDateTimeSl(payment.created_at)} &middot; {payment.provider}
+                </p>
+                {payment.provider_transaction_id && (
+                  <p className="mt-1 truncate font-mono text-xs text-muted-foreground">{payment.provider_transaction_id}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

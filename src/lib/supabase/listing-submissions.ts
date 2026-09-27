@@ -23,6 +23,50 @@ function numberOrNull(value: FormDataEntryValue | null): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
+// Only PRO Start/PRO/Dealer subscribers have a listing-count cap — a plain
+// "Zasebni oglas" user pays per listing, one at a time, with no plan
+// capping how many they can run concurrently. Returns a Slovenian error
+// message if the user is at their subscription's limit, or null if they can
+// submit. This is the real enforcement boundary — the UI has no matching
+// "disable button" logic to bypass, so this alone is what protects the
+// limit (not decorative, since there was previously no server-side check at
+// all despite max_active_listings being displayed in the UI).
+async function checkActiveListingLimit(userId: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data: subscription } = await admin
+    .from("subscriptions")
+    .select("plan_id, plans(name, max_active_listings)")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (!subscription || subscription.plan_id === "free") return null;
+  const plan = Array.isArray(subscription.plans) ? subscription.plans[0] : subscription.plans;
+  const maxListings = plan?.max_active_listings;
+  if (maxListings === null || maxListings === undefined) return null;
+
+  const nowIso = new Date().toISOString();
+  const [{ count: publishedCount }, { count: pendingCount }] = await Promise.all([
+    admin
+      .from("listing_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "published")
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`),
+    admin
+      .from("listing_submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "pending_review"),
+  ]);
+
+  const activeCount = (publishedCount ?? 0) + (pendingCount ?? 0);
+  if (activeCount >= maxListings) {
+    return `Dosegli ste omejitev vašega paketa (${plan?.name ?? ""}: največ ${maxListings} aktivnih oglasov). Za oddajo novega oglasa najprej deaktivirajte enega od obstoječih ali nadgradite paket.`;
+  }
+  return null;
+}
+
 export async function submitListingSubmission(
   _prevState: SubmitListingState,
   formData: FormData
@@ -75,6 +119,9 @@ export async function submitListingSubmission(
   if (!rateLimit.allowed) {
     return { error: "Preveč oddanih oglasov v kratkem času. Poskusite znova čez nekaj časa." };
   }
+
+  const limitError = await checkActiveListingLimit(user.id);
+  if (limitError) return { error: limitError };
 
   const featuresRaw = String(formData.get("features") ?? "");
   const features = featuresRaw
@@ -236,6 +283,15 @@ export async function updateListingSubmission(
   const contactName = String(formData.get("contactName") ?? "").trim();
   const contactPhone = String(formData.get("contactPhone") ?? "").trim();
   const contactEmail = String(formData.get("contactEmail") ?? "").trim();
+  const photoUrlsRaw = String(formData.get("photoUrls") ?? "[]");
+
+  let photoUrls: string[] = [];
+  try {
+    const parsed = JSON.parse(photoUrlsRaw);
+    if (Array.isArray(parsed)) photoUrls = parsed.filter((item) => typeof item === "string");
+  } catch {
+    photoUrls = [];
+  }
 
   if (title.length < 5) return { error: "Naslov mora imeti vsaj 5 znakov." };
   if (description.length < 20) return { error: "Opis mora imeti vsaj 20 znakov." };
@@ -246,6 +302,8 @@ export async function updateListingSubmission(
   if (!contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
     return { error: "Vnesite veljaven kontaktni e-poštni naslov." };
   }
+  if (photoUrls.length < 1) return { error: "Dodajte vsaj eno fotografijo." };
+  if (photoUrls.length > 12) return { error: "Največ 12 fotografij." };
 
   const record: Record<string, unknown> = {
     title,
@@ -255,6 +313,7 @@ export async function updateListingSubmission(
     contact_name: contactName,
     contact_phone: contactPhone,
     contact_email: contactEmail,
+    photo_urls: photoUrls,
     status: "pending_review",
     reviewed_at: null,
     reviewed_by: null,

@@ -26,7 +26,7 @@ export default async function MojiOglasiPage() {
 
   const { data: submissions } = await supabase
     .from("listing_submissions")
-    .select("id, title, price, location, status, created_at, photo_urls, is_top, is_featured_homepage")
+    .select("id, title, price, location, status, created_at, photo_urls, is_top, top_until, is_featured_homepage, featured_until")
     .eq("user_id", user!.id)
     .order("created_at", { ascending: false });
 
@@ -66,6 +66,14 @@ export default async function MojiOglasiPage() {
           {submissions.map((submission) => {
             const status = STATUS_LABELS[submission.status] ?? STATUS_LABELS.pending_review;
             const isPublished = submission.status === "published";
+            // is_top/is_featured_homepage are set once at payment time and
+            // never flip back automatically — top_until/featured_until are
+            // the real source of truth for whether the promotion is still
+            // active, so the badge and the "buy again" button both need to
+            // check the date, not just the boolean.
+            const topActive = submission.is_top && (!submission.top_until || new Date(submission.top_until) > new Date());
+            const featuredActive =
+              submission.is_featured_homepage && (!submission.featured_until || new Date(submission.featured_until) > new Date());
             return (
               <li
                 key={submission.id}
@@ -77,11 +85,11 @@ export default async function MojiOglasiPage() {
                     {submission.location} &middot; {formatPrice(submission.price)} &middot; oddano{" "}
                     {formatDate(submission.created_at)}
                   </p>
-                  {isPublished && (submission.is_top || submission.is_featured_homepage) && (
+                  {isPublished && (topActive || featuredActive) && (
                     <p className="mt-1 text-xs font-semibold text-primary">
-                      {submission.is_top && "TOP oglas"}
-                      {submission.is_top && submission.is_featured_homepage && " · "}
-                      {submission.is_featured_homepage && "Izpostavljeno na naslovnici"}
+                      {topActive && "TOP oglas"}
+                      {topActive && featuredActive && " · "}
+                      {featuredActive && "Izpostavljeno na naslovnici"}
                     </p>
                   )}
                 </div>
@@ -92,14 +100,14 @@ export default async function MojiOglasiPage() {
                     </Button>
                   )}
                   <ListingLifecycleActions submissionId={submission.id} status={submission.status} />
-                  {isPublished && !submission.is_top && topAddon && (
+                  {isPublished && !topActive && topAddon && (
                     <CheckoutButton
                       input={{ productType: "top_addon", productId: topAddon.id, relatedEntityId: submission.id }}
                       label={topAddon.cta_label ?? "Kupi TOP oglas"}
                       configured={stripeReady && Boolean(topAddon.stripe_price_id)}
                     />
                   )}
-                  {isPublished && !submission.is_featured_homepage && featureAddon && (
+                  {isPublished && !featuredActive && featureAddon && (
                     <CheckoutButton
                       input={{ productType: "homepage_addon", productId: featureAddon.id, relatedEntityId: submission.id }}
                       label={featureAddon.cta_label ?? "Izpostavi na naslovnici"}

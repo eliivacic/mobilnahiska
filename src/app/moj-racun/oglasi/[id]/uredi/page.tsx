@@ -18,7 +18,7 @@ export default async function EditListingPage(props: PageProps<"/moj-racun/oglas
   const { data: submission } = await supabase
     .from("listing_submissions")
     .select(
-      "id, type, title, description, price, location, contact_name, contact_phone, contact_email, condition, manufacturer, year, area, length, width, bedrooms, bathrooms, capacity, delivery_available, utilities_available, status"
+      "id, type, title, description, price, location, contact_name, contact_phone, contact_email, condition, manufacturer, year, area, length, width, bedrooms, bathrooms, capacity, delivery_available, utilities_available, status, photo_urls"
     )
     .eq("id", id)
     .eq("user_id", user!.id)
@@ -40,9 +40,11 @@ export default async function EditListingPage(props: PageProps<"/moj-racun/oglas
       <div className="mt-6">
         <EditListingForm
           submissionId={submission.id}
+          userId={user!.id}
           isHouseType={isHouseType}
           defaults={{
             title: submission.title,
+            photoUrls: submission.photo_urls ?? [],
             description: submission.description,
             price: String(submission.price),
             location: submission.location,

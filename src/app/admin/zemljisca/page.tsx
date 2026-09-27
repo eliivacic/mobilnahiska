@@ -31,40 +31,64 @@ export default async function AdminZemljiscaPage() {
       {rows.length === 0 ? (
         <p className="mt-6 text-sm text-muted-foreground">Ni oddanih zemljišč.</p>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-[14px] border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/60 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Naslov</th>
-                <th className="px-4 py-3">Lokacija</th>
-                <th className="px-4 py-3">Cena</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Ekskluzivno</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((land) => (
-                <tr key={land.id} className="border-t border-border">
-                  <td className="px-4 py-3 font-medium text-foreground">
-                    {land.status === "published" ? (
-                      <Link href={`/zemljisca/${land.slug}`} className="hover:underline" target="_blank">
-                        {land.title}
-                      </Link>
-                    ) : (
-                      land.title
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{land.location}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatPrice(land.price)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{land.status}</td>
-                  <td className="px-4 py-3">
-                    <ExclusiveToggle submissionId={land.id} isExclusive={land.is_exclusive} />
-                  </td>
+        <>
+          <div className="mt-6 hidden overflow-hidden rounded-[14px] border border-border md:block">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/60 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Naslov</th>
+                  <th className="px-4 py-3">Lokacija</th>
+                  <th className="px-4 py-3">Cena</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Ekskluzivno</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((land) => (
+                  <tr key={land.id} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {land.status === "published" ? (
+                        <Link href={`/zemljisca/${land.slug}`} className="hover:underline" target="_blank">
+                          {land.title}
+                        </Link>
+                      ) : (
+                        land.title
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{land.location}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatPrice(land.price)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{land.status}</td>
+                    <td className="px-4 py-3">
+                      <ExclusiveToggle submissionId={land.id} isExclusive={land.is_exclusive} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 space-y-3 md:hidden">
+            {rows.map((land) => (
+              <div key={land.id} className="rounded-[14px] border border-border bg-card p-4">
+                <p className="font-semibold text-foreground">
+                  {land.status === "published" ? (
+                    <Link href={`/zemljisca/${land.slug}`} className="hover:underline" target="_blank">
+                      {land.title}
+                    </Link>
+                  ) : (
+                    land.title
+                  )}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {land.location} &middot; {formatPrice(land.price)} &middot; {land.status}
+                </p>
+                <div className="mt-3">
+                  <ExclusiveToggle submissionId={land.id} isExclusive={land.is_exclusive} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
