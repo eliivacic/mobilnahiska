@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Menu, Plus } from "lucide-react";
@@ -68,7 +69,23 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
       >
       <PageShell className="flex h-24 items-center justify-between">
         <Link href="/" className="flex items-center">
-          <Logo variant="onLight" className="h-16 sm:h-20" />
+          {/* Wordmark-only mark on mobile/tablet; full icon lockup from lg up.
+              Each is wrapped rather than toggled via the Logo component's own
+              (hardcoded) classes, so there's no conflict between "hidden" and
+              its internal "inline-flex". */}
+          <span className="lg:hidden">
+            <Image
+              src="/logo-wordmark.png"
+              alt="mobilnahiska.si"
+              width={2172}
+              height={724}
+              priority
+              className="h-8 w-auto object-contain sm:h-9"
+            />
+          </span>
+          <span className="hidden lg:inline-flex">
+            <Logo variant="onLight" className="h-16 sm:h-20" />
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">
@@ -130,7 +147,13 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           <SheetContent side="right" className="w-72 border-brand-foreground/10 bg-brand text-brand-foreground">
             <SheetHeader>
               <SheetTitle className="sr-only">mobilnahiska.si</SheetTitle>
-              <Logo variant="onLight" className="h-14 self-start" />
+              <Image
+                src="/logo-wordmark.png"
+                alt="mobilnahiska.si"
+                width={2172}
+                height={724}
+                className="h-8 w-auto self-start object-contain"
+              />
             </SheetHeader>
             <nav className="flex flex-col gap-1 px-4">
               {NAV_LINKS.map((link) => (
