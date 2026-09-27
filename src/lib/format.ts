@@ -10,10 +10,21 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat("sl-SI").format(value);
 }
 
+// Both formatters pin timeZone explicitly (rather than relying on the
+// runtime's default) so server-rendered HTML always matches what the client
+// hydrates with. Without this, Vercel's serverless functions (UTC) and a
+// visitor's browser (Europe/Ljubljana) can format the same instant
+// differently — near midnight this even shifts the calendar day — which
+// React treats as a real content mismatch and throws a hydration error.
+const SLOVENIA_TZ = "Europe/Ljubljana";
+
 export function formatDate(isoDate: string): string {
-  return new Intl.DateTimeFormat("sl-SI", { day: "numeric", month: "long", year: "numeric" }).format(
-    new Date(isoDate)
-  );
+  return new Intl.DateTimeFormat("sl-SI", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: SLOVENIA_TZ,
+  }).format(new Date(isoDate));
 }
 
 // Compact numeric date + time for admin tables/feeds, e.g. "24. 9. 2026, 14:05".
@@ -24,6 +35,7 @@ export function formatDateTimeSl(isoDate: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: SLOVENIA_TZ,
   }).format(new Date(isoDate));
 }
 
