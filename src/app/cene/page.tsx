@@ -22,8 +22,6 @@ export default async function CenePage() {
 
   const isLoggedIn = !!userData.user;
   const allPlans = (plans as Plan[] | null) ?? [];
-  const privatePlan = allPlans.find((plan) => plan.billing_period === "one_time");
-  const subscriptionPlans = allPlans.filter((plan) => plan.billing_period !== "one_time");
   const promotionAddons = (addons as PromotionAddon[] | null) ?? [];
 
   if (allPlans.length === 0) {
@@ -51,22 +49,11 @@ export default async function CenePage() {
         </p>
       </div>
 
-      {privatePlan && (
-        <div className="mx-auto mt-10 max-w-lg">
-          <PlanCard plan={privatePlan} isLoggedIn={isLoggedIn} />
-        </div>
-      )}
-
-      {subscriptionPlans.length > 0 && (
-        <div className="mt-14">
-          <h2 className="text-center font-heading text-2xl font-light tracking-[-0.01em] text-foreground">
-            Za profesionalne ponudnike
-          </h2>
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {subscriptionPlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} isLoggedIn={isLoggedIn} />
-            ))}
-          </div>
+      {allPlans.length > 0 && (
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {allPlans.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} isLoggedIn={isLoggedIn} />
+          ))}
         </div>
       )}
 
