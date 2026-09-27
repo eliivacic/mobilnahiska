@@ -4,14 +4,20 @@ import { useState } from "react";
 import { Phone, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { normalizePhoneForTel } from "@/lib/format";
+import { trackEvent } from "@/lib/analytics";
 
-export function PhoneReveal({ phone }: { phone: string }) {
+export function PhoneReveal({ phone, listingSlug }: { phone: string; listingSlug?: string }) {
   const [revealed, setRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  function handleReveal() {
+    setRevealed(true);
+    trackEvent("phone_reveal", listingSlug ? { listing_slug: listingSlug } : {});
+  }
+
   if (!revealed) {
     return (
-      <Button variant="outline" className="w-full gap-2" onClick={() => setRevealed(true)}>
+      <Button variant="outline" className="w-full gap-2" onClick={handleReveal}>
         <Phone className="h-4 w-4" />
         Prikaži telefon
       </Button>

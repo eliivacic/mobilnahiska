@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import { formatPlanPrice, type Plan } from "@/types/pricing";
+import { isStripeConfigured } from "@/lib/payments/stripe-client";
+import { CheckoutButton } from "@/components/payments/CheckoutButton";
 
 export const metadata: Metadata = { title: "Moj paket | mobilnahiska.si" };
 
@@ -28,6 +30,7 @@ export default async function MojPaketPage() {
   const plan = (Array.isArray(subscription?.plans) ? subscription?.plans[0] : subscription?.plans) as
     | Plan
     | undefined;
+  const stripeReady = isStripeConfigured();
 
   return (
     <div>
@@ -73,6 +76,16 @@ export default async function MojPaketPage() {
                   {formatPlanPrice(option)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">{option.description}</p>
+                {plan?.id !== option.id && (
+                  <div className="mt-3">
+                    <CheckoutButton
+                      input={{ productType: "plan", productId: option.id }}
+                      label={`Nadgradi na ${option.name}`}
+                      className="w-full"
+                      configured={stripeReady && Boolean(option.stripe_price_id)}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -86,13 +99,14 @@ export default async function MojPaketPage() {
         </div>
       )}
 
-      <div className="mt-8 rounded-[14px] border border-dashed border-border p-6 text-center">
-        <p className="text-sm font-semibold text-foreground">Nadgradnja paketa še ni na voljo.</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Plačilni sistem še ni povezan — nakup plačljivih paketov bo mogoč, ko bo urejena integracija s
-          plačilnim ponudnikom.
-        </p>
-      </div>
+      {!stripeReady && (
+        <div className="mt-8 rounded-[14px] border border-dashed border-border p-6 text-center">
+          <p className="text-sm font-semibold text-foreground">Plačilni sistem še ni aktiviran.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Nakup plačljivih paketov bo mogoč, ko bo urejena integracija s plačilnim ponudnikom.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

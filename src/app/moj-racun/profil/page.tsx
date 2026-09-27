@@ -12,7 +12,7 @@ export default async function ProfilPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, phone, company_name")
+    .select("full_name, phone, company_name, role, description, website, location, logo_url")
     .eq("id", user!.id)
     .single();
 
@@ -23,9 +23,14 @@ export default async function ProfilPage() {
 
       <div className="mt-6">
         <ProfileForm
+          isDealer={profile?.role === "dealer"}
           defaultFullName={profile?.full_name ?? ""}
           defaultPhone={profile?.phone ?? ""}
           defaultCompanyName={profile?.company_name ?? ""}
+          defaultDescription={profile?.description ?? ""}
+          defaultWebsite={profile?.website ?? ""}
+          defaultLocation={profile?.location ?? ""}
+          defaultLogoUrl={profile?.logo_url ?? ""}
         />
       </div>
     </div>

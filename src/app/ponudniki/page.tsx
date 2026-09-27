@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/layout/PageShell";
-import { getProviders } from "@/data/listings";
+import { getProviders } from "@/lib/providers/public";
 import { ProviderGrid } from "@/components/listings/ProviderGrid";
 
 export const metadata: Metadata = { title: "Ponudniki | mobilnahiska.si" };
+export const dynamic = "force-dynamic";
 
-export default function PonudnikiPage() {
-  const providers = getProviders();
+export default async function PonudnikiPage() {
+  const providers = await getProviders();
 
   return (
     <PageShell className="py-8">

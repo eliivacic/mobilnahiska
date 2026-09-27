@@ -24,6 +24,10 @@ export interface Plan {
   // plan has exactly one row, but adding a new interval later is just a new
   // row with the same plan_group, no schema/UI change required.
   plan_group: string;
+  // Null until the Stripe product/price is created and mapped in at the
+  // final go-live step — see HANDOVER_CHECKLIST.md.
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
 }
 
 export interface PromotionAddon {
@@ -34,6 +38,8 @@ export interface PromotionAddon {
   description: string | null;
   cta_label: string | null;
   is_active: boolean;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
 }
 
 // Human-readable labels — the raw billing_period value ("one_time" etc.)

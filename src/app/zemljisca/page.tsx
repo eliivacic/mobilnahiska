@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { lands } from "@/data/land";
+import { getPublishedLands } from "@/lib/listings/public";
 import { LAND_TYPE_LABELS, type LandType } from "@/types/land";
 import { ZemljiscaPageClient } from "./ZemljiscaPageClient";
 
@@ -20,6 +20,8 @@ const LAND_DESCRIPTIONS: Record<LandType, string> = {
 
 const DEFAULT_TITLE = "Zemljišča naprodaj | mobilnahiska.si";
 const DEFAULT_DESCRIPTION = "Skrbno izbrana zemljišča za vaš naslednji projekt, po vsej Sloveniji in regiji.";
+
+export const dynamic = "force-dynamic";
 
 function isLandType(value: string | undefined): value is LandType {
   return !!value && value in LAND_TYPE_LABELS;
@@ -43,11 +45,11 @@ export async function generateMetadata(props: PageProps<"/zemljisca">): Promise<
   };
 }
 
-// Test/placeholder listings — see src/data/land.ts.
-export default function ZemljiscaPage() {
+export default async function ZemljiscaPage() {
+  const allLands = await getPublishedLands();
   return (
     <Suspense>
-      <ZemljiscaPageClient allLands={lands} />
+      <ZemljiscaPageClient allLands={allLands} />
     </Suspense>
   );
 }

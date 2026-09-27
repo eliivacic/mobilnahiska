@@ -283,3 +283,35 @@ export async function rejectListingSubmission(submissionId: string, reason: stri
   revalidatePath("/admin/oglasi");
   revalidatePath("/moj-racun/oglasi");
 }
+
+export async function updateInquiryStatus(inquiryId: string, status: "new" | "contacted" | "closed") {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+  const { data: before } = await admin.from("inquiries").select("status").eq("id", inquiryId).single();
+  await admin.from("inquiries").update({ status }).eq("id", inquiryId);
+  await logAdminAction({
+    adminId: user.id,
+    action: "inquiry.update_status",
+    entityType: "inquiry",
+    entityId: inquiryId,
+    before,
+    after: { status },
+  });
+  revalidatePath("/admin/povprasevanja");
+}
+
+export async function toggleListingExclusive(submissionId: string, isExclusive: boolean) {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+  await admin.from("listing_submissions").update({ is_exclusive: isExclusive }).eq("id", submissionId);
+  await logAdminAction({
+    adminId: user.id,
+    action: "listing_submission.toggle_exclusive",
+    entityType: "listing_submission",
+    entityId: submissionId,
+    before: { is_exclusive: !isExclusive },
+    after: { is_exclusive: isExclusive },
+  });
+  revalidatePath("/admin/zemljisca");
+  revalidatePath("/zemljisca");
+}

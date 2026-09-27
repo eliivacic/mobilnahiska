@@ -1,48 +1,75 @@
 import type { Metadata } from "next";
-import { guides } from "@/data/guides";
+import Link from "next/link";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
+import { ArticleRowActions } from "@/components/admin/ArticleRowActions";
 
 export const metadata: Metadata = { title: "Vodiči | Admin | mobilnahiska.si" };
 
-// Guides currently live in src/data/guides.ts. A real CMS (create/edit draft
-// /publish/schedule from this screen) needs a `guides` database table —
-// this view is read-only until that migration happens.
-export default function AdminVodiciPage() {
+export default async function AdminVodiciPage() {
+  const admin = createAdminClient();
+  const { data: articles } = await admin
+    .from("articles")
+    .select("id, title, category, slug, status, published_at, created_at")
+    .order("created_at", { ascending: false });
+
   return (
     <div>
-      <h1 className="font-heading text-2xl font-light tracking-[-0.01em] text-foreground">
-        Vodiči — Od parcele do hiške
-      </h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        Urejanje in objava člankov brez posega v kodo bo na voljo, ko bodo vodiči preseljeni v podatkovno bazo.
-      </p>
-
-      <div className="mt-6 overflow-hidden rounded-[14px] border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/60 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3">Naslov</th>
-              <th className="px-4 py-3">Kategorija</th>
-              <th className="px-4 py-3">Datum</th>
-              <th className="px-4 py-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {guides.map((guide) => (
-              <tr key={guide.slug} className="border-t border-border">
-                <td className="px-4 py-3 font-medium text-foreground">{guide.title}</td>
-                <td className="px-4 py-3 text-muted-foreground">{guide.category}</td>
-                <td className="px-4 py-3 text-muted-foreground">{formatDate(guide.date)}</td>
-                <td className="px-4 py-3">
-                  <span className="rounded-[4px] bg-secondary px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    Objavljeno
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-light tracking-[-0.01em] text-foreground">
+            Vodiči — Od parcele do hiške
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">Ustvarite, uredite in objavite članke.</p>
+        </div>
+        <Button asChild className="bg-primary text-primary-foreground hover:bg-brand-hover">
+          <Link href="/admin/vodici/nov">Nov članek</Link>
+        </Button>
       </div>
+
+      {!articles || articles.length === 0 ? (
+        <p className="mt-6 text-sm text-muted-foreground">Še ni ustvarjenih člankov.</p>
+      ) : (
+        <div className="mt-6 overflow-hidden rounded-[14px] border border-border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/60 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Naslov</th>
+                <th className="px-4 py-3">Kategorija</th>
+                <th className="px-4 py-3">Datum</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Dejanja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {articles.map((article) => (
+                <tr key={article.id} className="border-t border-border">
+                  <td className="px-4 py-3 font-medium text-foreground">{article.title}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{article.category}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatDate(article.published_at ?? article.created_at)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-[4px] px-2 py-0.5 text-[11px] font-semibold ${
+                        article.status === "published"
+                          ? "bg-secondary text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {article.status === "published" ? "Objavljeno" : "Osnutek"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <ArticleRowActions articleId={article.id} status={article.status} slug={article.slug} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

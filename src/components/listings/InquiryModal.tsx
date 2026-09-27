@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitInquiry, type InquiryActionState } from "@/lib/supabase/inquiries";
+import { trackEvent } from "@/lib/analytics";
 
 const initialState: InquiryActionState = {};
 
@@ -21,9 +22,11 @@ interface InquiryModalProps {
   listingSlug: string;
   listingTitle: string;
   sellerName: string;
+  // "/oglasi" for house listings (default), "/zemljisca" for land.
+  basePath?: string;
 }
 
-export function InquiryModal({ trigger, listingSlug, listingTitle, sellerName }: InquiryModalProps) {
+export function InquiryModal({ trigger, listingSlug, listingTitle, sellerName, basePath = "/oglasi" }: InquiryModalProps) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(submitInquiry, initialState);
 
@@ -36,7 +39,13 @@ export function InquiryModal({ trigger, listingSlug, listingTitle, sellerName }:
   const [message, setMessage] = useState(`Zanima me oglas "${listingTitle}". Prosim za več informacij.`);
 
   const listingUrl =
-    typeof window !== "undefined" ? `${window.location.origin}/oglasi/${listingSlug}` : `/oglasi/${listingSlug}`;
+    typeof window !== "undefined"
+      ? `${window.location.origin}${basePath}/${listingSlug}`
+      : `${basePath}/${listingSlug}`;
+
+  useEffect(() => {
+    if (state.success) trackEvent("inquiry_sent", { listing_slug: listingSlug });
+  }, [state.success, listingSlug]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

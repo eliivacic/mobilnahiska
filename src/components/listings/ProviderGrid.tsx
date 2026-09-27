@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
-import type { Provider } from "@/data/listings";
+import type { Provider } from "@/types/provider";
 import { pluralizeSl } from "@/lib/format";
 
 const COLUMNS = 4;
@@ -25,7 +25,7 @@ export function ProviderGrid({ providers }: { providers: Provider[] }) {
           <div className="min-w-0">
             <p className="truncate font-semibold text-foreground">{provider.name}</p>
             <p className="truncate text-[13px] text-muted-foreground">
-              {provider.country} &middot; {provider.activeListings}{" "}
+              {provider.location} &middot; {provider.activeListings}{" "}
               {pluralizeSl(provider.activeListings, ["oglas", "oglasa", "oglasi", "oglasov"])}
             </p>
           </div>

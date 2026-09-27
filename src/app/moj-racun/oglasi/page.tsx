@@ -3,13 +3,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice, formatDate } from "@/lib/format";
+import { isStripeConfigured } from "@/lib/payments/stripe-client";
+import { CheckoutButton } from "@/components/payments/CheckoutButton";
+import { ListingLifecycleActions } from "@/components/dashboard/ListingLifecycleActions";
+import type { PromotionAddon } from "@/types/pricing";
 
 export const metadata: Metadata = { title: "Moji oglasi | mobilnahiska.si" };
+export const dynamic = "force-dynamic";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   pending_review: { label: "V pregledu", className: "bg-accent text-primary" },
   published: { label: "Objavljeno", className: "bg-secondary text-primary" },
   rejected: { label: "Zavrnjeno", className: "bg-destructive/10 text-destructive" },
+  deactivated: { label: "Deaktivirano", className: "bg-muted text-muted-foreground" },
 };
 
 export default async function MojiOglasiPage() {
@@ -20,9 +26,18 @@ export default async function MojiOglasiPage() {
 
   const { data: submissions } = await supabase
     .from("listing_submissions")
-    .select("id, title, price, location, status, created_at, photo_urls")
+    .select("id, title, price, location, status, created_at, photo_urls, is_top, is_featured_homepage")
     .eq("user_id", user!.id)
     .order("created_at", { ascending: false });
+
+  const { data: addons } = await supabase
+    .from("promotion_addons")
+    .select("*")
+    .eq("is_active", true)
+    .returns<PromotionAddon[]>();
+  const topAddon = addons?.find((a) => a.id === "top-listing");
+  const featureAddon = addons?.find((a) => a.id === "homepage-feature");
+  const stripeReady = isStripeConfigured();
 
   return (
     <div>
@@ -50,6 +65,7 @@ export default async function MojiOglasiPage() {
         <ul className="mt-6 space-y-3">
           {submissions.map((submission) => {
             const status = STATUS_LABELS[submission.status] ?? STATUS_LABELS.pending_review;
+            const isPublished = submission.status === "published";
             return (
               <li
                 key={submission.id}
@@ -61,10 +77,39 @@ export default async function MojiOglasiPage() {
                     {submission.location} &middot; {formatPrice(submission.price)} &middot; oddano{" "}
                     {formatDate(submission.created_at)}
                   </p>
+                  {isPublished && (submission.is_top || submission.is_featured_homepage) && (
+                    <p className="mt-1 text-xs font-semibold text-primary">
+                      {submission.is_top && "TOP oglas"}
+                      {submission.is_top && submission.is_featured_homepage && " · "}
+                      {submission.is_featured_homepage && "Izpostavljeno na naslovnici"}
+                    </p>
+                  )}
                 </div>
-                <span className={`rounded-[6px] px-2.5 py-1 text-xs font-semibold ${status.className}`}>
-                  {status.label}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {submission.status !== "deactivated" && (
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/moj-racun/oglasi/${submission.id}/uredi`}>Uredi</Link>
+                    </Button>
+                  )}
+                  <ListingLifecycleActions submissionId={submission.id} status={submission.status} />
+                  {isPublished && !submission.is_top && topAddon && (
+                    <CheckoutButton
+                      input={{ productType: "top_addon", productId: topAddon.id, relatedEntityId: submission.id }}
+                      label={topAddon.cta_label ?? "Kupi TOP oglas"}
+                      configured={stripeReady && Boolean(topAddon.stripe_price_id)}
+                    />
+                  )}
+                  {isPublished && !submission.is_featured_homepage && featureAddon && (
+                    <CheckoutButton
+                      input={{ productType: "homepage_addon", productId: featureAddon.id, relatedEntityId: submission.id }}
+                      label={featureAddon.cta_label ?? "Izpostavi na naslovnici"}
+                      configured={stripeReady && Boolean(featureAddon.stripe_price_id)}
+                    />
+                  )}
+                  <span className={`rounded-[6px] px-2.5 py-1 text-xs font-semibold ${status.className}`}>
+                    {status.label}
+                  </span>
+                </div>
               </li>
             );
           })}

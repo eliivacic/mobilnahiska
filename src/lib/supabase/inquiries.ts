@@ -1,9 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendTransactionalEmail, isNotificationEnabled } from "@/lib/email/send";
 import { inquiryNotificationEmail } from "@/lib/email/templates";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface InquiryActionState {
   error?: string;
@@ -34,6 +36,13 @@ export async function submitInquiry(
   if (message.length < 5) return { error: "Sporočilo je prekratko." };
   if (message.length > 3000) return { error: "Sporočilo je predolgo (največ 3000 znakov)." };
 
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? "unknown";
+  const rateLimit = await checkRateLimit({ key: `inquiry:${ip}`, limit: 10, windowMinutes: 60 });
+  if (!rateLimit.allowed) {
+    return { error: "Preveč povpraševanj v kratkem času. Poskusite znova čez nekaj časa." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -45,6 +54,18 @@ export async function submitInquiry(
   // client so we can read the new row's id back for the dedup key below,
   // rather than granting anon a select policy just for this.
   const admin = createAdminClient();
+
+  // Real DB-backed listings carry their own contact_email — the inquiry
+  // notification goes straight to that seller. Falls back to the portal
+  // admin contact only when the slug doesn't resolve to a real submission
+  // (shouldn't happen for anything reachable from the live catalog anymore,
+  // but keeps this action from silently dropping a notification if it does).
+  const { data: submission } = await admin
+    .from("listing_submissions")
+    .select("id, contact_email")
+    .eq("slug", listingSlug)
+    .maybeSingle();
+
   const { data: inserted, error } = await admin
     .from("inquiries")
     .insert({
@@ -52,6 +73,7 @@ export async function submitInquiry(
       listing_title: listingTitle,
       listing_url: listingUrl,
       seller_name: sellerName,
+      listing_submission_id: submission?.id ?? null,
       user_id: user?.id ?? null,
       name,
       email,
@@ -65,18 +87,16 @@ export async function submitInquiry(
     return { error: "Povpraševanja ni bilo mogoče oddati. Poskusite znova." };
   }
 
-  // Listings shown on the public site are still static data (src/data),
-  // not tied to a real seller account yet — there is no real seller inbox
-  // to notify, so this goes to the portal admin instead. Once listings are
-  // fully database-backed with a real owner, this can notify that owner
-  // directly using the same template.
   if (await isNotificationEnabled("email_notify_inquiry")) {
-    const { data: setting } = await admin
-      .from("portal_settings")
-      .select("value")
-      .eq("key", "contact_email")
-      .single();
-    const notifyEmail = setting?.value;
+    let notifyEmail = submission?.contact_email;
+    if (!notifyEmail) {
+      const { data: setting } = await admin
+        .from("portal_settings")
+        .select("value")
+        .eq("key", "contact_email")
+        .single();
+      notifyEmail = setting?.value;
+    }
 
     if (notifyEmail) {
       const { subject, html } = inquiryNotificationEmail({

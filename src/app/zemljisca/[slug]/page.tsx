@@ -4,20 +4,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ChevronRight, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { getLandBySlug, lands } from "@/data/land";
-import { LAND_TYPE_LABELS } from "@/types/land";
+import { getLandBySlug } from "@/lib/listings/public";
+import { LAND_TYPE_LABELS, pricePerSquareMeter } from "@/types/land";
 import { formatPrice } from "@/lib/format";
+import { InquiryModal } from "@/components/listings/InquiryModal";
+import { PhoneReveal } from "@/components/listings/PhoneReveal";
+import { TrackListingView } from "@/components/listings/TrackListingView";
+import { Button } from "@/components/ui/button";
 
-export function generateStaticParams() {
-  return lands.map((land) => ({ slug: land.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: PageProps<"/zemljisca/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  const land = getLandBySlug(slug);
+  const land = await getLandBySlug(slug);
   if (!land) return {};
   return {
     title: `${land.title} | mobilnahiska.si`,
@@ -27,20 +28,23 @@ export async function generateMetadata(
 
 export default async function LandPage(props: PageProps<"/zemljisca/[slug]">) {
   const { slug } = await props.params;
-  const land = getLandBySlug(slug);
+  const land = await getLandBySlug(slug);
 
   if (!land) {
     notFound();
   }
 
+  const perSqm = pricePerSquareMeter(land);
   const specRows: [string, string][] = [
     ["Tip zemljišča", LAND_TYPE_LABELS[land.type]],
     ["Površina", `${land.area} m²`],
+    ...(perSqm !== null ? ([["Cena na m²", formatPrice(perSqm)]] as [string, string][]) : []),
     ["Lokacija", `${land.location}, ${land.country}`],
   ];
 
   return (
     <PageShell className="py-8">
+      <TrackListingView slug={land.slug} kind="land" />
       <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground">
           Domov
@@ -113,12 +117,21 @@ export default async function LandPage(props: PageProps<"/zemljisca/[slug]">) {
             <p className="font-heading text-2xl font-light tracking-[-0.01em] text-foreground">
               {formatPrice(land.price)}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Zanima vas to zemljišče? Kontaktirajte nas za več informacij.
-            </p>
-            <Button asChild className="mt-4 w-full bg-primary text-primary-foreground hover:bg-brand-hover">
-              <a href="mailto:info@mobilnahiska.si">Pošlji povpraševanje</a>
-            </Button>
+            <p className="mt-1 text-sm text-muted-foreground">Zanima vas to zemljišče? Pošljite povpraševanje.</p>
+            <div className="mt-4 space-y-2">
+              <InquiryModal
+                listingSlug={land.slug}
+                listingTitle={land.title}
+                sellerName={land.contactName ?? "Prodajalec"}
+                basePath="/zemljisca"
+                trigger={
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-brand-hover">
+                    Pošlji povpraševanje
+                  </Button>
+                }
+              />
+              {land.contactPhone && <PhoneReveal phone={land.contactPhone} listingSlug={land.slug} />}
+            </div>
           </div>
         </aside>
       </div>

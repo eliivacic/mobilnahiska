@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 import { Home, Building2, LandPlot, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,10 @@ export function OddajOglasForm({
   });
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [clientError, setClientError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (state.success && type) trackEvent("listing_created", { listing_type: type });
+  }, [state.success, type]);
 
   function update<K extends keyof FieldValues>(key: K, value: FieldValues[K]) {
     setFields((prev) => ({ ...prev, [key]: value }));

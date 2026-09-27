@@ -39,4 +39,7 @@ export interface Listing {
   features: string[];
   images: string[];
   seller: Seller;
+  // ISO timestamp. Optional because the static mock catalog (src/data) never
+  // set it — DB-backed listings (src/lib/listings/public.ts) always do.
+  createdAt?: string;
 }

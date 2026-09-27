@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Povpraševanja", href: "/moj-racun/povprasevanja" },
   { label: "Priljubljeni", href: "/moj-racun/priljubljeni" },
   { label: "Moj paket", href: "/moj-racun/paket" },
+  { label: "Plačila", href: "/moj-racun/placila" },
   { label: "Profil", href: "/moj-racun/profil" },
 ];
 

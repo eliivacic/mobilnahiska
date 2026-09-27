@@ -56,6 +56,10 @@
 }
 
 :root {
+  /* Set to a page's fixed bottom bar height (e.g. the mobile sticky inquiry
+     bar on /oglasi/[slug]) so CookieConsentBanner can stack above it instead
+     of overlapping — see MobileCtaBarPresence.tsx. Default 0 everywhere else. */
+  --mobile-cta-bar-offset: 0px;
   --background: #faf7f3;
   --foreground: #302521;
   --card: #ffffff;

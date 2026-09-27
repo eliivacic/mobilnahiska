@@ -3,7 +3,13 @@ import { getApprovedComments } from "@/lib/supabase/comments";
 import { CommentForm } from "@/components/comments/CommentForm";
 import { formatDate } from "@/lib/format";
 
-export async function CommentSection({ articleSlug }: { articleSlug: string }) {
+export async function CommentSection({
+  articleSlug,
+  commentsEnabled = true,
+}: {
+  articleSlug: string;
+  commentsEnabled?: boolean;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,7 +23,11 @@ export async function CommentSection({ articleSlug }: { articleSlug: string }) {
       </h2>
 
       <div className="mt-4">
-        {user ? (
+        {!commentsEnabled ? (
+          <p className="rounded-[12px] border border-dashed border-border p-4 text-sm text-muted-foreground">
+            Komentarji so za ta članek onemogočeni.
+          </p>
+        ) : user ? (
           <CommentForm articleSlug={articleSlug} />
         ) : (
           <p className="rounded-[12px] border border-dashed border-border p-4 text-sm text-muted-foreground">

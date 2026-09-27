@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { slugify } from "@/lib/slug";
 
 export interface AuthActionState {
   error?: string;
@@ -16,10 +18,24 @@ async function getOrigin(): Promise<string> {
   return `${proto}://${host}`;
 }
 
+async function getClientIp(): Promise<string> {
+  const h = await headers();
+  return h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? "unknown";
+}
+
 export async function signIn(_prevState: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const returnTo = safeRedirectPath(String(formData.get("returnTo") ?? ""), "/moj-racun");
+
+  const ip = await getClientIp();
+  const [byIp, byEmail] = await Promise.all([
+    checkRateLimit({ key: `login_ip:${ip}`, limit: 20, windowMinutes: 15 }),
+    checkRateLimit({ key: `login_email:${email.toLowerCase()}`, limit: 8, windowMinutes: 15 }),
+  ]);
+  if (!byIp.allowed || !byEmail.allowed) {
+    return { error: "Preveč neuspešnih poskusov prijave. Poskusite znova čez nekaj minut." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -57,6 +73,12 @@ export async function signUp(_prevState: SignUpActionState, formData: FormData):
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };
+  }
+
+  const ip = await getClientIp();
+  const rateLimit = await checkRateLimit({ key: `signup_ip:${ip}`, limit: 10, windowMinutes: 60 });
+  if (!rateLimit.allowed) {
+    return { error: "Preveč registracij v kratkem času s te naprave. Poskusite znova čez nekaj časa." };
   }
 
   const origin = await getOrigin();
@@ -100,6 +122,18 @@ export async function requestPasswordReset(
 ): Promise<RequestPasswordResetState> {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return { error: "Vnesite e-poštni naslov." };
+
+  const ip = await getClientIp();
+  const [byIp, byEmail] = await Promise.all([
+    checkRateLimit({ key: `password_reset_ip:${ip}`, limit: 10, windowMinutes: 60 }),
+    checkRateLimit({ key: `password_reset_email:${email.toLowerCase()}`, limit: 3, windowMinutes: 60 }),
+  ]);
+  // Still report success either way — this must not reveal whether the
+  // rate limit (or the email's existence) triggered the no-op, otherwise it
+  // becomes an account-enumeration oracle.
+  if (!byIp.allowed || !byEmail.allowed) {
+    return { submitted: true };
+  }
 
   const origin = await getOrigin();
   const supabase = await createClient();
@@ -149,6 +183,10 @@ export async function updateProfile(
   const fullName = String(formData.get("fullName") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const companyName = String(formData.get("companyName") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const website = String(formData.get("website") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const logoUrl = String(formData.get("logoUrl") ?? "").trim();
 
   const supabase = await createClient();
   const {
@@ -157,10 +195,29 @@ export async function updateProfile(
 
   if (!user) return { error: "Za urejanje profila se morate prijaviti." };
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({ full_name: fullName || null, phone: phone || null, company_name: companyName || null })
-    .eq("id", user.id);
+  const { data: currentProfile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const isDealer = currentProfile?.role === "dealer";
+
+  const update: Record<string, unknown> = {
+    full_name: fullName || null,
+    phone: phone || null,
+    company_name: companyName || null,
+  };
+
+  // Provider profile fields only apply to (and are only shown to) dealer
+  // accounts — regenerated from company_name every save so the slug can
+  // never silently drift from what SellerCard/public pages re-derive.
+  if (isDealer) {
+    Object.assign(update, {
+      description: description || null,
+      website: website || null,
+      location: location || null,
+      logo_url: logoUrl || null,
+      provider_slug: companyName ? slugify(companyName) : null,
+    });
+  }
+
+  const { error } = await supabase.from("profiles").update(update).eq("id", user.id);
 
   if (error) return { error: "Profila ni bilo mogoče posodobiti. Poskusite znova." };
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { listings } from "@/data/listings";
+import { getPublishedHouseListings } from "@/lib/listings/public";
 import { OglasiPageClient } from "./OglasiPageClient";
 
 const TITLES: Record<string, string> = {
@@ -16,6 +16,8 @@ const DESCRIPTIONS: Record<string, string> = {
 const DEFAULT_TITLE = "Mobilne in modularne hiške naprodaj | mobilnahiska.si";
 const DEFAULT_DESCRIPTION =
   "Prebrskajte oglase mobilnih in modularnih hišk, novih in rabljenih, po vsej Sloveniji in regiji.";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: PageProps<"/oglasi">): Promise<Metadata> {
   const searchParams = await props.searchParams;
@@ -34,10 +36,11 @@ export async function generateMetadata(props: PageProps<"/oglasi">): Promise<Met
   };
 }
 
-export default function OglasiPage() {
+export default async function OglasiPage() {
+  const allListings = await getPublishedHouseListings();
   return (
     <Suspense>
-      <OglasiPageClient allListings={listings} />
+      <OglasiPageClient allListings={allListings} />
     </Suspense>
   );
 }

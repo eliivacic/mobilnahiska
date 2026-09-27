@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { BadgeCheck, MapPin } from "lucide-react";
 import type { Seller } from "@/types/listing";
-import { slugifySellerName } from "@/data/listings";
+import { slugify } from "@/lib/slug";
 
 export function SellerCard({ seller }: { seller: Seller }) {
   const isProvider = seller.type === "Profesionalni prodajalec";
-  const providerHref = isProvider ? `/ponudniki/${slugifySellerName(seller.name)}` : undefined;
+  const providerHref = isProvider ? `/ponudniki/${slugify(seller.name)}` : undefined;
 
   const content = (
     <>

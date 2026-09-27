@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getLatestGuides } from "@/data/guides";
+import { getLatestArticles } from "@/lib/articles/public";
 import { GuideCard } from "@/components/guides/GuideCard";
 import { PageShell } from "@/components/layout/PageShell";
 
-export function GuidesPreview() {
-  const guides = getLatestGuides(3);
+export async function GuidesPreview() {
+  const guides = await getLatestArticles(3);
+  if (guides.length === 0) return null;
 
   return (
     <PageShell className="py-12">

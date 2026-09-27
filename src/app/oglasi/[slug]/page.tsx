@@ -4,23 +4,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check, ChevronRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getListingBySlug, listings } from "@/data/listings";
+import { getListingBySlug } from "@/lib/listings/public";
 import { ListingGallery } from "@/components/listings/ListingGallery";
 import { ListingSpecs } from "@/components/listings/ListingSpecs";
 import { SellerCard } from "@/components/listings/SellerCard";
 import { ListingInquiryBox } from "@/components/listings/ListingInquiryBox";
 import { InquiryModal } from "@/components/listings/InquiryModal";
+import { TrackListingView } from "@/components/listings/TrackListingView";
+import { MobileCtaBarPresence } from "@/components/listings/MobileCtaBarPresence";
 import { formatPrice } from "@/lib/format";
 
-export function generateStaticParams() {
-  return listings.map((listing) => ({ slug: listing.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: PageProps<"/oglasi/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  const listing = getListingBySlug(slug);
+  const listing = await getListingBySlug(slug);
   if (!listing) return {};
   return {
     title: `${listing.title} | mobilnahiska.si`,
@@ -35,7 +35,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
   const { slug } = await props.params;
-  const listing = getListingBySlug(slug);
+  const listing = await getListingBySlug(slug);
 
   if (!listing) {
     notFound();
@@ -56,6 +56,8 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
 
   return (
     <PageShell className="py-8">
+      <TrackListingView slug={listing.slug} kind="listing" />
+      <MobileCtaBarPresence />
       <nav aria-label="Breadcrumbs" className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground">
           Domov
@@ -111,17 +113,19 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
             </dl>
           </section>
 
-          <section>
-            <h2 className="font-heading text-[21px] font-light tracking-[-0.01em] text-foreground">Oprema</h2>
-            <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {listing.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm text-foreground/90">
-                  <Check className="h-4 w-4 shrink-0 text-brand" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {listing.features.length > 0 && (
+            <section>
+              <h2 className="font-heading text-[21px] font-light tracking-[-0.01em] text-foreground">Oprema</h2>
+              <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {listing.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-foreground/90">
+                    <Check className="h-4 w-4 shrink-0 text-brand" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section>
             <h2 className="font-heading text-[21px] font-light tracking-[-0.01em] text-foreground">Transport in dostava</h2>

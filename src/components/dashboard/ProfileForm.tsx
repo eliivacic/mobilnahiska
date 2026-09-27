@@ -9,13 +9,23 @@ import { updateProfile, type ProfileActionState } from "@/lib/supabase/actions";
 const initialState: ProfileActionState = {};
 
 export function ProfileForm({
+  isDealer,
   defaultFullName,
   defaultPhone,
   defaultCompanyName,
+  defaultDescription,
+  defaultWebsite,
+  defaultLocation,
+  defaultLogoUrl,
 }: {
+  isDealer: boolean;
   defaultFullName: string;
   defaultPhone: string;
   defaultCompanyName: string;
+  defaultDescription: string;
+  defaultWebsite: string;
+  defaultLocation: string;
+  defaultLogoUrl: string;
 }) {
   const [state, formAction, pending] = useActionState(updateProfile, initialState);
 
@@ -30,9 +40,44 @@ export function ProfileForm({
         <Input id="phone" name="phone" type="tel" defaultValue={defaultPhone} autoComplete="tel" />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="companyName">Podjetje (za profesionalne ponudnike)</Label>
+        <Label htmlFor="companyName">Podjetje {isDealer ? "" : "(za profesionalne ponudnike)"}</Label>
         <Input id="companyName" name="companyName" defaultValue={defaultCompanyName} autoComplete="organization" />
       </div>
+
+      {isDealer && (
+        <>
+          <div className="border-t border-border pt-4">
+            <p className="text-[13px] font-semibold uppercase tracking-wide text-foreground/70">
+              Javni profil ponudnika
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Prikazano na vaši javni strani ponudnika ({"/ponudniki/..."}).
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="description">Opis podjetja</Label>
+            <textarea
+              id="description"
+              name="description"
+              rows={4}
+              defaultValue={defaultDescription}
+              className="w-full rounded-[10px] border border-border bg-background p-3 text-sm text-foreground focus-visible:border-ring focus-visible:outline-none"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="location">Lokacija</Label>
+            <Input id="location" name="location" defaultValue={defaultLocation} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="website">Spletna stran (neobvezno)</Label>
+            <Input id="website" name="website" type="url" placeholder="https://" defaultValue={defaultWebsite} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="logoUrl">Logotip — URL slike (neobvezno)</Label>
+            <Input id="logoUrl" name="logoUrl" type="url" placeholder="https://" defaultValue={defaultLogoUrl} />
+          </div>
+        </>
+      )}
 
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
       {state.success && <p className="text-sm text-primary">Profil je posodobljen.</p>}

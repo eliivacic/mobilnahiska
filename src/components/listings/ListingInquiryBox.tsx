@@ -25,7 +25,7 @@ export function ListingInquiryBox({ listing }: { listing: Listing }) {
             </Button>
           }
         />
-        <PhoneReveal phone={listing.seller.phone} />
+        <PhoneReveal phone={listing.seller.phone} listingSlug={listing.slug} />
       </div>
 
       <div className="mt-5">

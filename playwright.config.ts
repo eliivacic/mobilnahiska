@@ -11,6 +11,8 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [["list"]],
+  globalSetup: require.resolve("./e2e/global-setup.ts"),
+  globalTeardown: require.resolve("./e2e/global-teardown.ts"),
   use: {
     baseURL: "http://localhost:3000",
     trace: "retain-on-failure",

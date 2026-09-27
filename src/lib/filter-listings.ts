@@ -191,7 +191,9 @@ export function sortListings(listings: Listing[], sort: SortKey): Listing[] {
       return sorted.sort((a, b) => b.area - a.area);
     case "newest":
     default:
-      return sorted.sort((a, b) => Number(b.id) - Number(a.id));
+      return sorted.sort(
+        (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+      );
   }
 }
 

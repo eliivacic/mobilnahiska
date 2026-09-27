@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 type FavoriteKind = "listing" | "land";
 
@@ -168,6 +169,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         supabase.from("favorites").delete().eq("user_id", userId).eq("kind", kind).eq("item_slug", slug).then();
       } else {
         supabase.from("favorites").insert({ user_id: userId, kind, item_slug: slug }).then();
+        trackEvent("favorite_added", { kind, listing_slug: slug });
       }
     },
     [favorites, signedIn, userId, router, pathname]

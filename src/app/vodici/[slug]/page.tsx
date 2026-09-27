@@ -2,30 +2,28 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getGuideBySlug, guides } from "@/data/guides";
+import { getArticleBySlug } from "@/lib/articles/public";
 import { formatDate } from "@/lib/format";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { PageShell } from "@/components/layout/PageShell";
 
-export function generateStaticParams() {
-  return guides.map((guide) => ({ slug: guide.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: PageProps<"/vodici/[slug]">
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  const guide = getGuideBySlug(slug);
+  const guide = await getArticleBySlug(slug);
   if (!guide) return {};
   return {
-    title: `${guide.title} | mobilnahiska.si`,
-    description: guide.excerpt,
+    title: guide.seoTitle || `${guide.title} | mobilnahiska.si`,
+    description: guide.seoDescription || guide.excerpt,
   };
 }
 
 export default async function GuidePage(props: PageProps<"/vodici/[slug]">) {
   const { slug } = await props.params;
-  const guide = getGuideBySlug(slug);
+  const guide = await getArticleBySlug(slug);
 
   if (!guide) {
     notFound();
@@ -51,7 +49,9 @@ export default async function GuidePage(props: PageProps<"/vodici/[slug]">) {
           <h1 className="mt-2 text-balance font-heading text-3xl font-light tracking-[-0.01em] text-foreground sm:text-4xl">
             {guide.title}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{formatDate(guide.date)}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {formatDate(guide.date)} &middot; {guide.author}
+          </p>
         </div>
 
         <div className="mt-8 space-y-5">
@@ -63,7 +63,7 @@ export default async function GuidePage(props: PageProps<"/vodici/[slug]">) {
         </div>
 
         <div>
-          <CommentSection articleSlug={guide.slug} />
+          <CommentSection articleSlug={guide.slug} commentsEnabled={guide.commentsEnabled} />
         </div>
 
         <div className="mt-10 border-t border-border pt-6">

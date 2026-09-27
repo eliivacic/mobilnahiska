@@ -66,6 +66,16 @@ test.describe("Home search and listing filters", () => {
     await expect(page.getByRole("heading", { name: "Izpostavljeni oglasi" })).toBeVisible();
   });
 
+  test("7. an impossible filter combination shows the real empty state, not an error", async ({ page }) => {
+    // priceMin higher than any real listing could match — exercises the
+    // catalog's legitimate "no results" state, which must render as a
+    // clear message + reset action, never as a blank page or a crash.
+    await page.goto("/oglasi?priceMin=999999999");
+    await expect(page.getByText("Ni oglasov, ki bi ustrezali izbranim filtrom.")).toBeVisible();
+    await page.getByRole("button", { name: "Ponastavi filtre" }).first().click();
+    await page.waitForURL((url) => url.search === "");
+  });
+
   test("browser back/forward restores previous filter state", async ({ page }) => {
     await page.goto("/oglasi");
     await page.waitForLoadState("networkidle");

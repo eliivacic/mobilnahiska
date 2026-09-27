@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface CommentActionState {
   error?: string;
@@ -26,6 +27,16 @@ export async function submitComment(
   } = await supabase.auth.getUser();
 
   if (!user) return { error: "Za komentiranje se morate prijaviti." };
+
+  const rateLimit = await checkRateLimit({ key: `comment:${user.id}`, limit: 10, windowMinutes: 60 });
+  if (!rateLimit.allowed) {
+    return { error: "Preveč komentarjev v kratkem času. Poskusite znova čez nekaj časa." };
+  }
+
+  const { data: article } = await supabase.from("articles").select("comments_enabled").eq("slug", articleSlug).single();
+  if (article && !article.comments_enabled) {
+    return { error: "Komentarji so za ta članek onemogočeni." };
+  }
 
   const { error } = await supabase.from("comments").insert({
     article_slug: articleSlug,

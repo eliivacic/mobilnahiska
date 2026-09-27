@@ -1,6 +1,7 @@
 # vercel
 .vercel
 .env*
+!.env.example
 
 # Claude Code local skills (installed via `npx skills add`, not app code)
 .claude/

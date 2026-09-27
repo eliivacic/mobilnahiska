@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/layout/PageShell";
-import { guides } from "@/data/guides";
+import { getPublishedArticles } from "@/lib/articles/public";
 import { GuideCard } from "@/components/guides/GuideCard";
 
 export const metadata: Metadata = {
@@ -9,7 +9,11 @@ export const metadata: Metadata = {
     "Praktični vodiči za izbiro zemljišča, nakup mobilne ali modularne hiške, pripravo terena in postavitev.",
 };
 
-export default function VodiciPage() {
+export const dynamic = "force-dynamic";
+
+export default async function VodiciPage() {
+  const guides = await getPublishedArticles();
+
   return (
     <PageShell className="py-8">
       <h1 className="font-heading text-3xl font-light tracking-[-0.01em] text-foreground sm:text-4xl">
@@ -19,11 +23,15 @@ export default function VodiciPage() {
         Praktični vodiči za izbiro zemljišča, nakup hiške, pripravo terena in postavitev.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {guides.map((guide) => (
-          <GuideCard key={guide.slug} guide={guide} />
-        ))}
-      </div>
+      {guides.length === 0 ? (
+        <p className="mt-8 text-sm text-muted-foreground">Trenutno ni objavljenih vodičev.</p>
+      ) : (
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {guides.map((guide) => (
+            <GuideCard key={guide.slug} guide={guide} />
+          ))}
+        </div>
+      )}
     </PageShell>
   );
 }

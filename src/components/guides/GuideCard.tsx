@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import type { Guide } from "@/data/guides";
+import type { Article } from "@/types/article";
 import { formatDate } from "@/lib/format";
 
-export function GuideCard({ guide }: { guide: Guide }) {
+export function GuideCard({ guide }: { guide: Article }) {
   return (
     <Link
       href={`/vodici/${guide.slug}`}
