@@ -1,6 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendTransactionalEmail, isNotificationEnabled } from "@/lib/email/send";
+import { listingSubmittedEmail, adminNewListingEmail } from "@/lib/email/templates";
 
 export interface SubmitListingState {
   error?: string;
@@ -127,10 +130,49 @@ export async function submitListingSubmission(
     return { error: "Izberite vrsto nepremičnine." };
   }
 
-  const { error } = await supabase.from("listing_submissions").insert(record);
+  const { data: inserted, error } = await supabase
+    .from("listing_submissions")
+    .insert(record)
+    .select("id")
+    .single();
 
   if (error) {
     return { error: "Oglasa ni bilo mogoče oddati. Poskusite znova." };
+  }
+
+  if (await isNotificationEnabled("email_notify_listing_status")) {
+    const { subject, html } = listingSubmittedEmail({ title });
+    await sendTransactionalEmail({
+      to: contactEmail,
+      subject,
+      html,
+      emailType: "listing_submitted",
+      dedupKey: `listing_submitted:${inserted.id}`,
+      userId: user.id,
+      relatedEntityType: "listing_submission",
+      relatedEntityId: inserted.id,
+    });
+  }
+
+  if (await isNotificationEnabled("email_notify_admin")) {
+    const admin = createAdminClient();
+    const { data: setting } = await admin
+      .from("portal_settings")
+      .select("value")
+      .eq("key", "contact_email")
+      .single();
+    if (setting?.value) {
+      const { subject, html } = adminNewListingEmail({ title, submitterEmail: contactEmail });
+      await sendTransactionalEmail({
+        to: setting.value,
+        subject,
+        html,
+        emailType: "admin_new_listing",
+        dedupKey: `admin_new_listing:${inserted.id}`,
+        relatedEntityType: "listing_submission",
+        relatedEntityId: inserted.id,
+      });
+    }
   }
 
   return { success: true };

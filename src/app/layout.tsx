@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { ConditionalChrome } from "@/components/layout/ConditionalChrome";
 import { createClient } from "@/lib/supabase/server";
@@ -40,6 +41,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang="sl"
       className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-C7XR50X00S"
+        strategy="afterInteractive"
+      />
+      <Script id="google-tag-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-C7XR50X00S');
+        `}
+      </Script>
       <body className="flex min-h-full flex-col">
         <FavoritesProvider>
           <ConditionalChrome userEmail={user?.email} isAdmin={isAdmin}>

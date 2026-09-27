@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/supabase/require-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logAdminAction } from "@/lib/supabase/audit";
+import { sendTransactionalEmail, isNotificationEnabled } from "@/lib/email/send";
+import { listingApprovedEmail, listingRejectedEmail } from "@/lib/email/templates";
 
 export async function moderateComment(commentId: string, status: "approved" | "hidden") {
   const { user } = await requireAdmin();
@@ -176,4 +178,108 @@ export async function updatePortalSettingsBatch(entries: Record<string, string>)
     after: entries,
   });
   revalidatePath("/admin/nastavitve");
+}
+
+export async function approveListingSubmission(submissionId: string) {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+
+  const { data: submission } = await admin
+    .from("listing_submissions")
+    .select("title, contact_email, user_id, status")
+    .eq("id", submissionId)
+    .single();
+  if (!submission) return;
+
+  // The only concretely priced listing lifetime today is the one-time
+  // "Zasebni oglas" plan's duration — read from `plans` (single source of
+  // truth) instead of hardcoding "30 days" here. Once listings are tied to
+  // whichever plan the submitter actually holds, this can use that plan's
+  // duration_days instead of always falling back to zasebni-oglas.
+  const { data: plan } = await admin
+    .from("plans")
+    .select("duration_days")
+    .eq("id", "zasebni-oglas")
+    .single();
+  const durationDays = plan?.duration_days ?? 30;
+  const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+
+  await admin
+    .from("listing_submissions")
+    .update({ status: "published", reviewed_at: new Date().toISOString(), reviewed_by: user.id, expires_at: expiresAt })
+    .eq("id", submissionId);
+
+  await logAdminAction({
+    adminId: user.id,
+    action: "listing_submission.approve",
+    entityType: "listing_submission",
+    entityId: submissionId,
+    before: { status: submission.status },
+    after: { status: "published", expires_at: expiresAt },
+  });
+
+  if (await isNotificationEnabled("email_notify_listing_status")) {
+    const { subject, html } = listingApprovedEmail({ title: submission.title, expiresAt });
+    await sendTransactionalEmail({
+      to: submission.contact_email,
+      subject,
+      html,
+      emailType: "listing_approved",
+      dedupKey: `listing_approved:${submissionId}`,
+      userId: submission.user_id,
+      relatedEntityType: "listing_submission",
+      relatedEntityId: submissionId,
+    });
+  }
+
+  revalidatePath("/admin/oglasi");
+  revalidatePath("/moj-racun/oglasi");
+}
+
+export async function rejectListingSubmission(submissionId: string, reason: string) {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+
+  const { data: submission } = await admin
+    .from("listing_submissions")
+    .select("title, contact_email, user_id, status")
+    .eq("id", submissionId)
+    .single();
+  if (!submission) return;
+
+  await admin
+    .from("listing_submissions")
+    .update({
+      status: "rejected",
+      rejection_reason: reason,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user.id,
+    })
+    .eq("id", submissionId);
+
+  await logAdminAction({
+    adminId: user.id,
+    action: "listing_submission.reject",
+    entityType: "listing_submission",
+    entityId: submissionId,
+    before: { status: submission.status },
+    after: { status: "rejected", rejection_reason: reason },
+  });
+
+  if (await isNotificationEnabled("email_notify_listing_status")) {
+    const { subject, html } = listingRejectedEmail({ title: submission.title, reason });
+    await sendTransactionalEmail({
+      to: submission.contact_email,
+      subject,
+      html,
+      emailType: "listing_rejected",
+      dedupKey: `listing_rejected:${submissionId}`,
+      userId: submission.user_id,
+      relatedEntityType: "listing_submission",
+      relatedEntityId: submissionId,
+    });
+  }
+
+  revalidatePath("/admin/oglasi");
+  revalidatePath("/moj-racun/oglasi");
 }

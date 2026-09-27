@@ -43,7 +43,10 @@ export async function signUp(_prevState: SignUpActionState, formData: FormData):
   const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
   const termsAccepted = formData.get("termsAccepted") === "on";
-  const returnTo = safeRedirectPath(String(formData.get("returnTo") ?? ""), "/moj-racun");
+  // Defaults to the homepage (not /moj-racun) so confirming an email with no
+  // specific returnTo in flight lands the user on mobilnahiska.si itself —
+  // an explicit returnTo (e.g. from /oddaj-oglas) still takes priority.
+  const returnTo = safeRedirectPath(String(formData.get("returnTo") ?? ""), "/");
 
   const fieldErrors: Record<string, string> = {};
   if (!fullName) fieldErrors.fullName = "Vnesite ime in priimek.";
