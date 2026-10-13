@@ -171,3 +171,27 @@ export function adminNewListingEmail(params: { title: string; submitterEmail: st
     }),
   };
 }
+
+export function listingReportedEmail(params: {
+  listingTitle: string;
+  listingUrl: string;
+  reason: string;
+  reporterName: string;
+  reporterEmail: string;
+  message: string;
+}) {
+  return {
+    subject: `Prijava oglasa: ${params.listingTitle} | mobilnahiska.si`,
+    html: renderEmail({
+      title: "Prejeli smo prijavo oglasa",
+      paragraphs: [`Nekdo je prijavil oglas "${params.listingTitle}" kot neustrezen.`],
+      details: [
+        { label: "Razlog", value: params.reason },
+        { label: "Sporočilo prijavitelja", value: params.message },
+        { label: "Prijavitelj", value: `${params.reporterName} (${params.reporterEmail})` },
+      ],
+      ctaLabel: "Odpri prijave v administraciji",
+      ctaHref: `${SITE_URL}/admin/prijave`,
+    }),
+  };
+}

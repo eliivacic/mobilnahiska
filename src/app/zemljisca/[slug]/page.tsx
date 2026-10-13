@@ -3,11 +3,12 @@ import { PageShell } from "@/components/layout/PageShell";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronRight, MapPin } from "lucide-react";
+import { ChevronRight, Flag, MapPin } from "lucide-react";
 import { getLandBySlug } from "@/lib/listings/public";
 import { LAND_TYPE_LABELS, pricePerSquareMeter } from "@/types/land";
 import { formatPrice } from "@/lib/format";
 import { InquiryModal } from "@/components/listings/InquiryModal";
+import { ReportListingModal } from "@/components/listings/ReportListingModal";
 import { PhoneReveal } from "@/components/listings/PhoneReveal";
 import { TrackListingView } from "@/components/listings/TrackListingView";
 import { Button } from "@/components/ui/button";
@@ -110,6 +111,21 @@ export default async function LandPage(props: PageProps<"/zemljisca/[slug]">) {
               </p>
             </div>
           </section>
+
+          <ReportListingModal
+            listingSlug={land.slug}
+            listingTitle={land.title}
+            basePath="/zemljisca"
+            trigger={
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-destructive"
+              >
+                <Flag className="h-3.5 w-3.5" />
+                Prijavi oglas
+              </button>
+            }
+          />
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:h-fit">

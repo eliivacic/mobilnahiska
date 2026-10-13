@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/layout/PageShell";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, ChevronRight, MapPin } from "lucide-react";
+import { Check, ChevronRight, Flag, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getListingBySlug } from "@/lib/listings/public";
 import { ListingGallery } from "@/components/listings/ListingGallery";
@@ -10,6 +10,7 @@ import { ListingSpecs } from "@/components/listings/ListingSpecs";
 import { SellerCard } from "@/components/listings/SellerCard";
 import { ListingInquiryBox } from "@/components/listings/ListingInquiryBox";
 import { InquiryModal } from "@/components/listings/InquiryModal";
+import { ReportListingModal } from "@/components/listings/ReportListingModal";
 import { TrackListingView } from "@/components/listings/TrackListingView";
 import { MobileCtaBarPresence } from "@/components/listings/MobileCtaBarPresence";
 import { formatPrice } from "@/lib/format";
@@ -155,6 +156,20 @@ export default async function ListingPage(props: PageProps<"/oglasi/[slug]">) {
               <SellerCard seller={listing.seller} />
             </div>
           </section>
+
+          <ReportListingModal
+            listingSlug={listing.slug}
+            listingTitle={listing.title}
+            trigger={
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-destructive"
+              >
+                <Flag className="h-3.5 w-3.5" />
+                Prijavi oglas
+              </button>
+            }
+          />
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:h-fit">

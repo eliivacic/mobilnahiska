@@ -27,6 +27,7 @@ const columns = [
       { label: "Pogoji uporabe", href: "/pogoji" },
       { label: "Politika zasebnosti", href: "/zasebnost" },
       { label: "Piškotki", href: "/piskotki" },
+      { label: "Pravno obvestilo", href: "/impresum" },
     ],
   },
 ];

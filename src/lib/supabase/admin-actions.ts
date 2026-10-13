@@ -300,6 +300,25 @@ export async function updateInquiryStatus(inquiryId: string, status: "new" | "co
   revalidatePath("/admin/povprasevanja");
 }
 
+export async function updateListingReportStatus(reportId: string, status: "new" | "reviewed" | "dismissed") {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+  const { data: before } = await admin.from("listing_reports").select("status").eq("id", reportId).single();
+  await admin
+    .from("listing_reports")
+    .update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user.id })
+    .eq("id", reportId);
+  await logAdminAction({
+    adminId: user.id,
+    action: "listing_report.update_status",
+    entityType: "listing_report",
+    entityId: reportId,
+    before,
+    after: { status },
+  });
+  revalidatePath("/admin/prijave");
+}
+
 export async function toggleListingExclusive(submissionId: string, isExclusive: boolean) {
   const { user } = await requireAdmin();
   const admin = createAdminClient();

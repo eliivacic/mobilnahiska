@@ -17,6 +17,7 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
       { label: "Zemljišča", href: "/admin/zemljisca" },
       { label: "Ponudniki", href: "/admin/ponudniki" },
       { label: "Povpraševanja", href: "/admin/povprasevanja" },
+      { label: "Prijave oglasov", href: "/admin/prijave" },
     ],
   },
   { title: "Uporabniki", items: [{ label: "Uporabniki", href: "/admin/uporabniki" }] },
