@@ -1,7 +1,6 @@
-// Zazidljiva zemljišča ("land") don't have a data source yet — there is no
-// backend/database in this project. This type documents the shape the UI
-// already expects, so a future API/data layer can be dropped in without
-// touching the components. Mirrors the structure of `Listing`
+// Zazidljiva zemljišča ("land") are backed by the same `listing_submissions`
+// table as house listings (type = 'zemljisce') — see toLand() in
+// src/lib/listings/public.ts. Mirrors the structure of `Listing`
 // (src/types/listing.ts) for consistency across the marketplace.
 
 import type { Country } from "@/types/listing";

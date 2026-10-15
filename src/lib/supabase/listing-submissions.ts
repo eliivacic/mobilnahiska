@@ -401,6 +401,16 @@ export async function reactivateListingSubmission(submissionId: string): Promise
   } = await supabase.auth.getUser();
   if (!user) return { error: "Za to dejanje se morate prijaviti." };
 
+  // A deactivated listing doesn't count toward the plan's active-listing cap
+  // (checkActiveListingLimit only counts published/pending_review rows), and
+  // reactivating is an UPDATE — the enforce_active_listing_limit DB trigger
+  // only fires on INSERT (see supabase/migrations/002_...), so it never runs
+  // here either. Without this check, a capped-plan user could deactivate one
+  // listing, submit a new one, then reactivate the old one too and end up
+  // over their limit with no enforcement anywhere in the path.
+  const limitError = await checkActiveListingLimit(user.id);
+  if (limitError) return { error: limitError };
+
   // Reactivating sends it back through moderation rather than straight back
   // to published — the listing may have been off the market for a while
   // (price, availability) and content should be re-checked, same as an edit.

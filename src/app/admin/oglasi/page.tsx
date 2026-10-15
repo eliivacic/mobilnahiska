@@ -4,11 +4,10 @@ import { ListingModerationRow } from "@/components/dashboard/ListingModerationRo
 
 export const metadata: Metadata = { title: "Oglasi | Admin | mobilnahiska.si" };
 
-// Mobilna/modularna/zemljišče listings shown publicly still come from the
-// static data files (src/data) — this page moderates real submissions from
-// /oddaj-oglas (the `listing_submissions` table). Approving one here does
-// not yet make it appear on the public listing pages, since those aren't
-// sourced from the database yet; see the technical report.
+// Moderates real submissions from /oddaj-oglas (the `listing_submissions`
+// table). Approving one here immediately makes it appear on the public
+// listing pages, which read from this same table via
+// src/lib/listings/public.ts (status = 'published' and not expired).
 export default async function AdminOglasiPage() {
   const admin = createAdminClient();
   const { data: submissions } = await admin

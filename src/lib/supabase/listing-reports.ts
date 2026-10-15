@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendTransactionalEmail, isNotificationEnabled } from "@/lib/email/send";
 import { listingReportedEmail } from "@/lib/email/templates";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { REPORT_REASONS } from "@/lib/supabase/listing-report-reasons";
 
 export interface ReportListingActionState {
   error?: string;
@@ -12,14 +13,6 @@ export interface ReportListingActionState {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export const REPORT_REASONS: Record<string, string> = {
-  zavajajoce: "Zavajajoči podatki (cena, površina, stanje …)",
-  neustrezna_vsebina: "Neustrezna ali žaljiva vsebina",
-  goljufija: "Sum goljufije",
-  tuja_vsebina: "Tuje fotografije ali besedilo brez dovoljenja",
-  drugo: "Drugo",
-};
 
 export async function reportListing(
   _prevState: ReportListingActionState,
