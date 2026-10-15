@@ -1,7 +1,7 @@
 // Shared shapes for the `payments` / `subscriptions` tables. See
-// supabase/migrations/008_payments.sql for the schema these mirror.
+// supabase/migrations/000_baseline_schema.sql for the schema these mirror.
 
-export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled" | "refunded";
+export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled" | "refunded" | "disputed";
 
 // "listing" = the one-time "Zasebni oglas" fee, "plan" = a recurring PRO
 // Start/PRO/Dealer subscription, "top_addon"/"homepage_addon" = the two
@@ -50,6 +50,7 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   failed: "Neuspešno",
   cancelled: "Preklicano",
   refunded: "Vrnjeno",
+  disputed: "Sporno (chargeback)",
 };
 
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {

@@ -4,18 +4,20 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripeClient } from "@/lib/payments/stripe-client";
 import { activateProductForPayment } from "@/lib/payments/activate";
+import { sendTransactionalEmail, isNotificationEnabled } from "@/lib/email/send";
+import { subscriptionPaymentFailedEmail } from "@/lib/email/templates";
 import type { Payment } from "@/lib/payments/types";
 
 export const dynamic = "force-dynamic";
 
-// Not wired up to anything in Stripe yet — this route exists so the
-// integration point is ready. It will do nothing useful until:
-//   1. STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET are set, and
-//   2. this URL (https://www.mobilnahiska.si/api/webhooks/stripe) is added
-//      as an endpoint in the Stripe Dashboard listening for at least
-//      checkout.session.completed, checkout.session.expired,
-//      customer.subscription.updated, customer.subscription.deleted.
-// See HANDOVER_CHECKLIST.md for the full go-live checklist.
+// Live since 2026-10-14 (Stripe account acct_1UPhemFKtsSIsyP5, mobilnahiska.si).
+// The endpoint is registered in the Stripe Dashboard — Developers → Webhooks
+// — for at least: checkout.session.completed, checkout.session.expired,
+// payment_intent.payment_failed, customer.subscription.updated,
+// customer.subscription.deleted, invoice.paid, invoice.payment_failed,
+// charge.refunded, charge.dispute.created. If a new case is added below,
+// its event type must also be added to that endpoint's event list in the
+// Stripe Dashboard, or it will simply never be delivered here.
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const stripe = getStripeClient();
@@ -61,12 +63,9 @@ export async function POST(request: Request) {
         const paymentId = session.metadata?.payment_id ?? session.client_reference_id;
         if (!paymentId) break;
 
+        const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
         const transactionId =
-          typeof session.payment_intent === "string"
-            ? session.payment_intent
-            : typeof session.subscription === "string"
-              ? session.subscription
-              : null;
+          typeof session.payment_intent === "string" ? session.payment_intent : subscriptionId;
 
         const { data: payment } = await admin
           .from("payments")
@@ -75,7 +74,7 @@ export async function POST(request: Request) {
           .select()
           .single<Payment>();
 
-        if (payment) await activateProductForPayment(payment);
+        if (payment) await activateProductForPayment(payment, subscriptionId);
         break;
       }
 
@@ -108,6 +107,122 @@ export async function POST(request: Request) {
             cancel_at_period_end: subscription.cancel_at_period_end,
           })
           .eq("provider_subscription_id", subscription.id);
+        break;
+      }
+
+      // A recurring renewal (second month onward) — the very first period is
+      // set by activateProductForPayment() off checkout.session.completed;
+      // this is what advances current_period_end for every charge after
+      // that, and recovers a subscription from "past_due" if a previously
+      // failed payment now succeeds (e.g. the customer updated their card).
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subField = invoice.parent?.subscription_details?.subscription;
+        const subscriptionId = typeof subField === "string" ? subField : (subField?.id ?? null);
+        if (!subscriptionId) break;
+
+        await admin
+          .from("subscriptions")
+          .update({
+            status: "active",
+            current_period_start: new Date(invoice.period_start * 1000).toISOString(),
+            current_period_end: new Date(invoice.period_end * 1000).toISOString(),
+          })
+          .eq("provider_subscription_id", subscriptionId);
+        break;
+      }
+
+      // A recurring renewal charge failed (expired/declined card, insufficient
+      // funds, ...). Stripe retries automatically per its own retry schedule
+      // (Smart Retries) and sends customer.subscription.deleted later if every
+      // retry ultimately fails — this case only marks the in-between state so
+      // it's visible instead of silently staying "active" while actually
+      // unpaid, and lets the user know before the subscription actually lapses.
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subField = invoice.parent?.subscription_details?.subscription;
+        const subscriptionId = typeof subField === "string" ? subField : (subField?.id ?? null);
+        if (!subscriptionId) break;
+
+        const { data: subscription } = await admin
+          .from("subscriptions")
+          .update({ status: "past_due" })
+          .eq("provider_subscription_id", subscriptionId)
+          .select("user_id, plans(name)")
+          .single();
+
+        if (subscription && (await isNotificationEnabled("email_notify_listing_status"))) {
+          const { data: authUser } = await admin.auth.admin.getUserById(subscription.user_id);
+          const recipient = authUser?.user?.email;
+          const plan = Array.isArray(subscription.plans) ? subscription.plans[0] : subscription.plans;
+          if (recipient) {
+            const { subject, html } = subscriptionPaymentFailedEmail({ planName: plan?.name ?? "Paket" });
+            await sendTransactionalEmail({
+              to: recipient,
+              subject,
+              html,
+              emailType: "subscription_payment_failed",
+              dedupKey: `subscription_payment_failed:${event.id}`,
+              userId: subscription.user_id,
+            });
+          }
+        }
+        break;
+      }
+
+      // A voluntary refund, issued from the Stripe Dashboard. Records the
+      // real status only — does NOT automatically reverse whatever the
+      // payment activated (e.g. deactivate a TOP listing or revoke a plan),
+      // since a partial or goodwill refund shouldn't necessarily undo the
+      // entitlement. An admin who sees "Vrnjeno" in /admin/placila can
+      // decide that separately, with full context a webhook doesn't have.
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId =
+          typeof charge.payment_intent === "string" ? charge.payment_intent : (charge.payment_intent?.id ?? null);
+        if (!paymentIntentId) break;
+
+        await admin.from("payments").update({ status: "refunded" }).eq("provider_transaction_id", paymentIntentId);
+        break;
+      }
+
+      // A chargeback. Same non-reversing policy as charge.refunded — record
+      // the status, let an admin decide on the entitlement, and notify them
+      // since a dispute (unlike a refund) is adversarial and usually needs a
+      // timely response in the Stripe Dashboard to contest or accept it.
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        const paymentIntentId =
+          typeof dispute.payment_intent === "string" ? dispute.payment_intent : (dispute.payment_intent?.id ?? null);
+        if (!paymentIntentId) break;
+
+        const { data: payment } = await admin
+          .from("payments")
+          .update({ status: "disputed" })
+          .eq("provider_transaction_id", paymentIntentId)
+          .select("id, amount_cents, user_id")
+          .single();
+
+        if (payment && (await isNotificationEnabled("email_notify_admin"))) {
+          const { data: setting } = await admin
+            .from("portal_settings")
+            .select("value")
+            .eq("key", "contact_email")
+            .single();
+          if (setting?.value) {
+            await sendTransactionalEmail({
+              to: setting.value,
+              subject: "POZOR: prejet chargeback (dispute) | mobilnahiska.si",
+              html: `<p>Stripe je prejel ugovor (chargeback) za plačilo <code>${payment.id}</code> v znesku ${(
+                payment.amount_cents / 100
+              ).toFixed(2)} €.</p><p>Odzovi se v Stripe Dashboard → Payments → Disputes, praviloma v nekaj dneh.</p>`,
+              emailType: "payment_disputed",
+              dedupKey: `payment_disputed:${event.id}`,
+              relatedEntityType: "payment",
+              relatedEntityId: payment.id,
+            });
+          }
+        }
         break;
       }
 

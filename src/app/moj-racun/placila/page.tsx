@@ -12,6 +12,7 @@ const STATUS_BADGE: Record<Payment["status"], string> = {
   failed: "bg-destructive/10 text-destructive",
   cancelled: "bg-muted text-muted-foreground",
   refunded: "bg-muted text-muted-foreground",
+  disputed: "bg-destructive/10 text-destructive",
 };
 
 export default async function MojaPlacilaPage() {
