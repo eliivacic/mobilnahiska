@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getListingBySlug } from "@/data/listings";
-import { getLandBySlug } from "@/data/land";
+import { getListingBySlug, getLandBySlug } from "@/lib/listings/public";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { LandCard } from "@/components/listings/LandCard";
 import type { Listing } from "@/types/listing";
@@ -22,18 +21,23 @@ export default async function PriljubljeniPage() {
     .eq("user_id", user!.id)
     .order("created_at", { ascending: false });
 
+  const resolved = await Promise.all(
+    (favorites ?? []).map((favorite) =>
+      favorite.kind === "listing"
+        ? getListingBySlug(favorite.item_slug)
+        : getLandBySlug(favorite.item_slug)
+    )
+  );
+
   const favoriteListings: Listing[] = [];
   const favoriteLands: Land[] = [];
 
-  for (const favorite of favorites ?? []) {
-    if (favorite.kind === "listing") {
-      const listing = getListingBySlug(favorite.item_slug);
-      if (listing) favoriteListings.push(listing);
-    } else {
-      const land = getLandBySlug(favorite.item_slug);
-      if (land) favoriteLands.push(land);
-    }
-  }
+  (favorites ?? []).forEach((favorite, index) => {
+    const item = resolved[index];
+    if (!item) return; // no longer published/expired — matches search visibility
+    if (favorite.kind === "listing") favoriteListings.push(item as Listing);
+    else favoriteLands.push(item as Land);
+  });
 
   const isEmpty = favoriteListings.length === 0 && favoriteLands.length === 0;
 

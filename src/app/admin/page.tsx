@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { listings, getProviders } from "@/data/listings";
-import { lands } from "@/data/land";
-import { guides } from "@/data/guides";
-import { formatDateTimeSl } from "@/lib/format";
+import { formatDateTimeSl, formatPrice } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Admin | mobilnahiska.si" };
 
@@ -22,6 +19,12 @@ export default async function AdminPregledPage() {
     { count: totalUsers },
     { count: pendingComments },
     { count: totalComments },
+    { count: mobilnaCount },
+    { count: modularnaCount },
+    { count: zemljiscaCount },
+    { count: providersCount },
+    { count: publishedGuidesCount },
+    { data: paidPayments },
     { data: recentProfiles },
     { data: recentComments },
     { data: recentAuditLog },
@@ -29,6 +32,12 @@ export default async function AdminPregledPage() {
     admin.from("profiles").select("id", { count: "exact", head: true }),
     admin.from("comments").select("id", { count: "exact", head: true }).eq("status", "pending"),
     admin.from("comments").select("id", { count: "exact", head: true }),
+    admin.from("listing_submissions").select("id", { count: "exact", head: true }).eq("type", "mobilna"),
+    admin.from("listing_submissions").select("id", { count: "exact", head: true }).eq("type", "modularna"),
+    admin.from("listing_submissions").select("id", { count: "exact", head: true }).eq("type", "zemljisce"),
+    admin.from("profiles").select("id", { count: "exact", head: true }).not("provider_slug", "is", null),
+    admin.from("articles").select("id", { count: "exact", head: true }).eq("status", "published"),
+    admin.from("payments").select("amount_cents").eq("status", "paid"),
     admin.from("profiles").select("id, full_name, role, created_at").order("created_at", { ascending: false }).limit(5),
     admin
       .from("comments")
@@ -38,21 +47,18 @@ export default async function AdminPregledPage() {
     admin.from("admin_audit_log").select("id, admin_id, action, entity_type, created_at").order("created_at", { ascending: false }).limit(5),
   ]);
 
-  const mobilnaCount = listings.filter((listing) => listing.type === "mobilna").length;
-  const modularnaCount = listings.filter((listing) => listing.type === "modularna").length;
-  const providersCount = getProviders().length;
-  const publishedGuidesCount = guides.length;
+  const totalRevenueCents = (paidPayments ?? []).reduce((sum, row) => sum + row.amount_cents, 0);
 
   const primaryKpis = [
     { label: "Skupno uporabnikov", value: totalUsers ?? 0, href: "/admin/uporabniki" },
-    { label: "Mobilne hiške", value: mobilnaCount, href: "/admin/oglasi" },
-    { label: "Modularne hiške", value: modularnaCount, href: "/admin/oglasi" },
-    { label: "Zemljišča", value: lands.length, href: "/admin/zemljisca" },
+    { label: "Mobilne hiške", value: mobilnaCount ?? 0, href: "/admin/oglasi" },
+    { label: "Modularne hiške", value: modularnaCount ?? 0, href: "/admin/oglasi" },
+    { label: "Zemljišča", value: zemljiscaCount ?? 0, href: "/admin/zemljisca" },
   ];
 
   const secondaryKpis = [
-    { label: "Ponudniki", value: providersCount },
-    { label: "Vodiči objavljeni", value: publishedGuidesCount },
+    { label: "Ponudniki", value: providersCount ?? 0 },
+    { label: "Vodiči objavljeni", value: publishedGuidesCount ?? 0 },
     { label: "Komentarji čakajo", value: pendingComments ?? 0 },
     { label: "Komentarji skupaj", value: totalComments ?? 0 },
   ];
@@ -171,10 +177,19 @@ export default async function AdminPregledPage() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-[14px] border border-dashed border-border p-6 text-center">
-        <p className="text-sm font-semibold text-foreground">Prihodki in plačila</p>
+      <div className="mt-8 rounded-[14px] border border-border bg-card p-6">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-foreground">Prihodki in plačila</p>
+          <Link href="/admin/placila" className="text-sm font-medium text-primary hover:underline">
+            Vsa plačila →
+          </Link>
+        </div>
+        <p className="mt-2 font-heading text-2xl font-light tracking-[-0.01em] text-foreground">
+          {formatPrice(totalRevenueCents / 100)}
+        </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ta razdelek bo prikazoval prave finančne podatke, ko bo povezan plačilni ponudnik.
+          Skupaj iz {(paidPayments ?? []).length}{" "}
+          {(paidPayments ?? []).length === 1 ? "uspešno plačane transakcije" : "uspešno plačanih transakcij"}.
         </p>
       </div>
 

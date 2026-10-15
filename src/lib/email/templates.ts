@@ -195,3 +195,18 @@ export function listingReportedEmail(params: {
     }),
   };
 }
+
+export function subscriptionPaymentFailedEmail(params: { planName: string }) {
+  return {
+    subject: "Obnovitev paketa ni uspela | mobilnahiska.si",
+    html: renderEmail({
+      title: "Obnovitev paketa ni uspela",
+      paragraphs: [
+        `Plačilo za podaljšanje paketa "${params.planName}" ni uspelo. Preverite podatke plačilne kartice — Stripe bo poskus samodejno ponovil.`,
+        "Če se obnovitev ne bo izvedla, bo paket deaktiviran ob poteku trenutnega obdobja.",
+      ],
+      ctaLabel: "Preveri paket",
+      ctaHref: `${SITE_URL}/moj-racun/paket`,
+    }),
+  };
+}

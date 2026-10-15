@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { reportListing, REPORT_REASONS, type ReportListingActionState } from "@/lib/supabase/listing-reports";
+import { reportListing, type ReportListingActionState } from "@/lib/supabase/listing-reports";
+import { REPORT_REASONS } from "@/lib/supabase/listing-report-reasons";
 
 const initialState: ReportListingActionState = {};
 

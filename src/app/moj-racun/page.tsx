@@ -30,6 +30,21 @@ export default async function MojRacunPregledPage() {
     .select("id", { count: "exact", head: true })
     .eq("user_id", user!.id);
 
+  // "Active" mirrors the definition enforce_active_listing_limit() uses in
+  // the database: still pending review, or published and not yet expired.
+  const nowIso = new Date().toISOString();
+  const { count: activeListingsCount } = await supabase
+    .from("listing_submissions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user!.id)
+    .or(`status.eq.pending_review,and(status.eq.published,or(expires_at.is.null,expires_at.gt.${nowIso}))`);
+
+  // RLS (inquiries_select_own_listings) already scopes this to inquiries on
+  // the current user's own listings, so no explicit join/filter is needed.
+  const { count: inquiriesCount } = await supabase
+    .from("inquiries")
+    .select("id", { count: "exact", head: true });
+
   const displayName = profile?.full_name || user!.email;
   const plan = Array.isArray(subscription?.plans) ? subscription?.plans[0] : subscription?.plans;
 
@@ -44,8 +59,8 @@ export default async function MojRacunPregledPage() {
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Aktivni oglasi", value: "0" },
-          { label: "Prejeta povpraševanja", value: "0" },
+          { label: "Aktivni oglasi", value: String(activeListingsCount ?? 0) },
+          { label: "Prejeta povpraševanja", value: String(inquiriesCount ?? 0) },
           { label: "Priljubljeni", value: String(favoritesCount ?? 0) },
           { label: "Trenutni paket", value: plan?.name ?? "Brezplačen" },
         ].map((stat) => (
@@ -60,13 +75,15 @@ export default async function MojRacunPregledPage() {
         ))}
       </div>
 
-      <div className="mt-8 flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border p-8 text-center">
-        <p className="text-sm font-semibold text-foreground">Trenutno še nimate objavljenih oglasov.</p>
-        <p className="text-sm text-muted-foreground">Oddajte prvi oglas in ga upravljajte na enem mestu.</p>
-        <Button asChild className="mt-3 bg-primary text-primary-foreground hover:bg-brand-hover">
-          <Link href="/oddaj-oglas">Oddaj prvi oglas</Link>
-        </Button>
-      </div>
+      {(activeListingsCount ?? 0) === 0 && (
+        <div className="mt-8 flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border p-8 text-center">
+          <p className="text-sm font-semibold text-foreground">Trenutno še nimate objavljenih oglasov.</p>
+          <p className="text-sm text-muted-foreground">Oddajte prvi oglas in ga upravljajte na enem mestu.</p>
+          <Button asChild className="mt-3 bg-primary text-primary-foreground hover:bg-brand-hover">
+            <Link href="/oddaj-oglas">Oddaj prvi oglas</Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ const STATUS_BADGE: Record<Payment["status"], string> = {
   failed: "bg-destructive/10 text-destructive",
   cancelled: "bg-muted text-muted-foreground",
   refunded: "bg-muted text-muted-foreground",
+  disputed: "bg-destructive/10 text-destructive",
 };
 
 export default async function AdminPlacilaPage(props: PageProps<"/admin/placila">) {
@@ -42,8 +43,7 @@ export default async function AdminPlacilaPage(props: PageProps<"/admin/placila"
     <div>
       <h1 className="font-heading text-2xl font-light tracking-[-0.01em] text-foreground">Plačila</h1>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        Pregled dejanskih zapisov plačil. Dokler Stripe ni povezan, ta seznam ostane prazen — tu ni izmišljenih
-        zneskov.
+        Pregled dejanskih zapisov plačil prek Stripe — tu ni izmišljenih zneskov.
       </p>
 
       <form method="get" className="mt-6 flex flex-wrap items-end gap-3 rounded-[14px] border border-border bg-card p-4">

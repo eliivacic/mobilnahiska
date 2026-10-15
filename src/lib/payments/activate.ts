@@ -19,7 +19,15 @@ function addInterval(from: Date, interval: "monthly" | "biannual" | "yearly" | n
 // payment as paid — see /admin/placila). The checkout success page never
 // calls this directly: activation must always be driven by a verified
 // payment record, never by the client reaching a "thank you" URL.
-export async function activateProductForPayment(payment: Payment): Promise<void> {
+export async function activateProductForPayment(
+  payment: Payment,
+  // Stripe's subscription id, for "plan" products only. Stored on the
+  // subscriptions row so a later invoice.paid/invoice.payment_failed
+  // webhook (recurring renewals/failures — not this initial purchase) can
+  // find the right row via provider_subscription_id instead of user_id,
+  // since by then the payment that created it is long gone from context.
+  stripeSubscriptionId?: string | null
+): Promise<void> {
   const admin = createAdminClient();
 
   if (payment.product_type === "listing" && payment.related_entity_id) {
@@ -59,6 +67,7 @@ export async function activateProductForPayment(payment: Payment): Promise<void>
         current_period_end: periodEnd.toISOString(),
         cancel_at_period_end: false,
         provider: payment.provider,
+        provider_subscription_id: stripeSubscriptionId ?? null,
       },
       { onConflict: "user_id" }
     );
