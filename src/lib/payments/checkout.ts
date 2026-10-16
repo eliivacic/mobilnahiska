@@ -54,6 +54,16 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
   if (!product) return { ok: false, reason: "unknown_product" };
   if (!product.stripe_price_id) return { ok: false, reason: "missing_price_mapping" };
 
+  // promotion_addons are always one-time; plans can be either (e.g.
+  // "Zasebni oglas" is a one-time fee, not a subscription, despite living in
+  // the `plans` table) — read the real billing_period rather than assuming
+  // every "plan" productType is recurring.
+  let billingPeriod: string | null = null;
+  if (table === "plans") {
+    const { data: planRow } = await admin.from("plans").select("billing_period").eq("id", input.productId).single();
+    billingPeriod = planRow?.billing_period ?? null;
+  }
+
   const { data: payment, error: insertError } = await admin
     .from("payments")
     .insert({
@@ -73,7 +83,7 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
   if (insertError || !payment) return { ok: false, reason: "stripe_error" };
 
   const siteUrl = "https://www.mobilnahiska.si";
-  const mode = input.productType === "plan" ? "subscription" : "payment";
+  const mode = billingPeriod === "monthly" ? "subscription" : "payment";
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -91,8 +101,12 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
       // one-time purchases this also generates a downloadable PDF invoice
       // carrying that company/tax info; subscriptions already get an
       // invoice every billing cycle without this flag.
+      // Stripe rejects `tax_id_collection.required: "if_supported"` when
+      // `name_collection.business.optional` is true (confirmed via a real
+      // live checkout-session call) — "never" keeps the field genuinely
+      // optional end-to-end, matching the "never forced" intent.
       name_collection: { business: { enabled: true, optional: true } },
-      tax_id_collection: { enabled: true, required: "if_supported" },
+      tax_id_collection: { enabled: true, required: "never" },
       billing_address_collection: "required",
       ...(mode === "payment" ? { invoice_creation: { enabled: true, invoice_data: {} } } : {}),
     });
