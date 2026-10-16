@@ -63,6 +63,54 @@ export default function PiskotkiPage() {
           </section>
 
           <section>
+            <h2 className="mb-2 text-base font-semibold text-foreground">Seznam piškotkov</h2>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[560px] border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="py-2 pr-4 font-semibold">Ime</th>
+                    <th className="py-2 pr-4 font-semibold">Kategorija</th>
+                    <th className="py-2 pr-4 font-semibold">Namen</th>
+                    <th className="py-2 font-semibold">Trajanje</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <tr>
+                    <td className="py-2 pr-4 font-mono text-xs">mh_cookie_consent</td>
+                    <td className="py-2 pr-4">Nujni</td>
+                    <td className="py-2 pr-4">Shrani vašo izbiro glede soglasja za piškotke.</td>
+                    <td className="py-2">1 leto</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 font-mono text-xs">sb-&lt;id&gt;-auth-token</td>
+                    <td className="py-2 pr-4">Nujni</td>
+                    <td className="py-2 pr-4">Ohranja vašo prijavo (Supabase avtentikacija).</td>
+                    <td className="py-2">Trajanje seje / do odjave</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 font-mono text-xs">_ga</td>
+                    <td className="py-2 pr-4">Analitični</td>
+                    <td className="py-2 pr-4">Google Analytics — razloči obiskovalce med seboj.</td>
+                    <td className="py-2">2 leti</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 font-mono text-xs">_ga_&lt;id&gt;</td>
+                    <td className="py-2 pr-4">Analitični</td>
+                    <td className="py-2 pr-4">Google Analytics — stanje obiska (GA4).</td>
+                    <td className="py-2">2 leti</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Piškotka <span className="font-mono">mh_cookie_consent</span> in piškotek za prijavo se
+              naložita vedno. Piškotka <span className="font-mono">_ga</span> in{" "}
+              <span className="font-mono">_ga_&lt;id&gt;</span> se naložita izključno po vašem soglasju za
+              analitiko — do takrat se ne naložita in se ne nastavita.
+            </p>
+          </section>
+
+          <section>
             <h2 className="mb-2 text-base font-semibold text-foreground">Upravljanje piškotkov</h2>
             <p>
               Svojo izbiro lahko kadarkoli spremenite prek nastavitev soglasja na portalu ali piškotke
