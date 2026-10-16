@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
+import { PasswordChangeForm } from "@/components/dashboard/PasswordChangeForm";
 
 export const metadata: Metadata = { title: "Profil | mobilnahiska.si" };
 
@@ -32,6 +33,13 @@ export default async function ProfilPage() {
           defaultLocation={profile?.location ?? ""}
           defaultLogoUrl={profile?.logo_url ?? ""}
         />
+      </div>
+
+      <div className="mt-10 border-t border-border pt-6">
+        <h2 className="text-[13px] font-semibold uppercase tracking-wide text-foreground/70">Geslo</h2>
+        <div className="mt-4">
+          <PasswordChangeForm />
+        </div>
       </div>
     </div>
   );

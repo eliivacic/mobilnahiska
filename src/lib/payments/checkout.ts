@@ -84,6 +84,17 @@ export async function createCheckoutSession(input: CreateCheckoutInput): Promise
       client_reference_id: payment.id,
       customer_email: user.email ?? undefined,
       metadata: { payment_id: payment.id, product_type: input.productType, product_id: input.productId },
+      // "Plačilo na firmo": lets the buyer optionally check "I'm purchasing
+      // as a business", enter a company name and a VAT/tax ID (Stripe
+      // validates the format per country) and get a full billing address —
+      // never forced, since most buyers here are private sellers. For
+      // one-time purchases this also generates a downloadable PDF invoice
+      // carrying that company/tax info; subscriptions already get an
+      // invoice every billing cycle without this flag.
+      name_collection: { business: { enabled: true, optional: true } },
+      tax_id_collection: { enabled: true, required: "if_supported" },
+      billing_address_collection: "required",
+      ...(mode === "payment" ? { invoice_creation: { enabled: true, invoice_data: {} } } : {}),
     });
 
     await admin.from("payments").update({ provider_session_id: session.id }).eq("id", payment.id);
