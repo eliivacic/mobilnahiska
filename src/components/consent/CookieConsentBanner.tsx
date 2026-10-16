@@ -1,19 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { Cookie } from "lucide-react";
 import { useConsent } from "@/components/consent/ConsentProvider";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export function CookieConsentBanner() {
-  const { hasChosen, setConsent } = useConsent();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [analytics, setAnalytics] = useState(false);
-  const [marketing, setMarketing] = useState(false);
+  const { consent, hasChosen, setConsent } = useConsent();
+  // Separate from hasChosen on purpose: hasChosen tracks whether the visitor
+  // has EVER made a choice, panelOpen tracks whether the settings panel is
+  // open right now — reopened later via the persistent icon, or on first
+  // visit via "Nastavitve" in the initial banner. Both paths land here.
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [analytics, setAnalytics] = useState(consent.analytics);
+  const [marketing, setMarketing] = useState(consent.marketing);
 
-  if (hasChosen) return null;
+  function openPanel() {
+    // Re-seed from the current saved choice each time it's reopened, so
+    // editing later doesn't show stale values from the first visit.
+    setAnalytics(consent.analytics);
+    setMarketing(consent.marketing);
+    setPanelOpen(true);
+  }
 
-  if (settingsOpen) {
+  if (panelOpen) {
     return (
       <div
         role="dialog"
@@ -40,16 +51,42 @@ export function CookieConsentBanner() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               className="bg-primary text-primary-foreground hover:bg-brand-hover"
-              onClick={() => setConsent({ analytics, marketing })}
+              onClick={() => {
+                setConsent({ analytics, marketing });
+                setPanelOpen(false);
+              }}
             >
               Shrani nastavitve
             </Button>
-            <Button variant="outline" onClick={() => setSettingsOpen(false)}>
-              Nazaj
-            </Button>
+            {/* Before a first choice exists there's nothing to go "back" to
+                other than the initial banner, so only offer Cancel once a
+                real saved choice is already in place. */}
+            {hasChosen && (
+              <Button variant="outline" onClick={() => setPanelOpen(false)}>
+                Prekliči
+              </Button>
+            )}
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (hasChosen) {
+    // Persistent, always-reachable way back into cookie settings — without
+    // this, a visitor who already chose has no way to change their mind
+    // short of clearing cookies manually.
+    return (
+      <button
+        type="button"
+        aria-label="Nastavitve piškotkov"
+        title="Nastavitve piškotkov"
+        onClick={openPanel}
+        style={{ bottom: "calc(var(--mobile-cta-bar-offset, 0px) + 16px)" }}
+        className="fixed right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-[0_4px_16px_-4px_rgba(48,37,33,0.25)] transition-colors hover:text-foreground"
+      >
+        <Cookie className="h-5 w-5" />
+      </button>
     );
   }
 
@@ -67,7 +104,7 @@ export function CookieConsentBanner() {
           .
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
+          <Button variant="outline" size="sm" onClick={openPanel}>
             Nastavitve
           </Button>
           <Button variant="outline" size="sm" onClick={() => setConsent({ analytics: false, marketing: false })}>
