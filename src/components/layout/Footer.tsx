@@ -34,21 +34,21 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="bg-brand">
+    <footer className="bg-header">
       <PageShell className="py-12">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="flex items-center">
-              <Logo variant="onDark" className="h-16" />
+              <Logo variant="onLight" className="h-16" />
             </Link>
-            <p className="mt-3 max-w-xs text-sm text-brand-foreground/70">
+            <p className="mt-3 max-w-xs text-sm text-header-foreground/75">
               Slovenski marketplace za mobilne in modularne hiške ter zemljišča.
             </p>
           </div>
 
           {columns.map((column) => (
             <div key={column.title}>
-              <h3 className="text-[13px] font-semibold uppercase tracking-wide text-brand-foreground/60">
+              <h3 className="text-[13px] font-semibold uppercase tracking-wide text-header-foreground/75">
                 {column.title}
               </h3>
               <ul className="mt-3 space-y-2">
@@ -56,7 +56,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-brand-foreground/80 transition-colors hover:text-brand-foreground"
+                      className="text-sm text-header-foreground/80 transition-colors hover:text-header-foreground"
                     >
                       {link.label}
                     </Link>
@@ -67,7 +67,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-brand-foreground/15 pt-6 text-sm text-brand-foreground/60 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-header-foreground/15 pt-6 text-sm text-header-foreground/75 sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} mobilnahiska.si. Vse pravice pridržane.</p>
         </div>
       </PageShell>

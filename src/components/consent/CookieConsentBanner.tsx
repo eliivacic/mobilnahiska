@@ -30,7 +30,7 @@ export function CookieConsentBanner() {
         role="dialog"
         aria-label="Nastavitve piškotkov"
         style={{ bottom: "var(--mobile-cta-bar-offset, 0px)" }}
-        className="fixed inset-x-0 z-50 border-t border-border bg-card p-4 shadow-[0_-8px_24px_-12px_rgba(48,37,33,0.2)] sm:p-6"
+        className="fixed inset-x-0 z-50 border-t border-border bg-card p-4 shadow-[0_-8px_24px_-12px_rgba(48,42,38,0.2)] sm:p-6"
       >
         <div className="mx-auto max-w-3xl">
           <p className="font-heading text-lg font-light tracking-[-0.01em] text-foreground">Nastavitve piškotkov</p>
@@ -83,7 +83,7 @@ export function CookieConsentBanner() {
         title="Nastavitve piškotkov"
         onClick={openPanel}
         style={{ bottom: "calc(var(--mobile-cta-bar-offset, 0px) + 16px)" }}
-        className="fixed right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-[0_4px_16px_-4px_rgba(48,37,33,0.25)] transition-colors hover:text-foreground"
+        className="fixed right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-[0_4px_16px_-4px_rgba(48,42,38,0.25)] transition-colors hover:text-foreground"
       >
         <Cookie className="h-5 w-5" />
       </button>
@@ -93,7 +93,7 @@ export function CookieConsentBanner() {
   return (
     <div
       style={{ bottom: "var(--mobile-cta-bar-offset, 0px)" }}
-      className="fixed inset-x-0 z-50 border-t border-border bg-card p-4 shadow-[0_-8px_24px_-12px_rgba(48,37,33,0.2)] sm:p-6"
+      className="fixed inset-x-0 z-50 border-t border-border bg-card p-4 shadow-[0_-8px_24px_-12px_rgba(48,42,38,0.2)] sm:p-6"
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-foreground/90">

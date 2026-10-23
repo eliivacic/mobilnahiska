@@ -51,7 +51,7 @@ export function AdminMobileNav({ adminName, adminEmail }: { adminName: string; a
                       onClick={() => setOpen(false)}
                       className={`block rounded-[8px] px-2.5 py-2 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-secondary text-secondary-foreground"
                           : "text-foreground/75 hover:bg-muted hover:text-foreground"
                       }`}
                     >

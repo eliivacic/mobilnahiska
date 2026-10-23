@@ -16,7 +16,7 @@ export function LandCard({ land }: { land: Land }) {
   return (
     <Link
       href={`/zemljisca/${land.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[14px] border border-border/60 bg-card shadow-[0_1px_2px_rgba(48,37,33,0.04)] transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-border hover:shadow-[0_8px_20px_-10px_rgba(48,37,33,0.18)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[14px] border border-border/60 bg-card shadow-[0_1px_2px_rgba(48,42,38,0.04)] transition-[border-color,box-shadow] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-border hover:shadow-[0_8px_20px_-10px_rgba(48,42,38,0.18)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         <Image
