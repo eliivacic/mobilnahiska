@@ -1,13 +1,12 @@
 import Image from "next/image";
 
-// The current mark (public/logo-mark.png) is white artwork on a transparent
-// background, so it only reads on a dark surface. On light surfaces we wrap
-// it in a dark chip so it stays visible. Once a header-ready (dark ink)
-// variant of the logo exists, swap the `src` below and drop the chip wrapper
-// for `onLight` — the rest of the layout won't need to change.
+// public/logo-mark.png is dark-brown line art on a transparent background —
+// reads directly on any light/sage-green surface (the whole site, post
+// redesign). `onDark` wraps it in a light chip for the rare case it ever
+// needs to sit on a dark surface, where the brown mark alone would vanish.
 const LOGO_SRC = "/logo-mark.png";
-const LOGO_WIDTH = 1686;
-const LOGO_HEIGHT = 933;
+const LOGO_WIDTH = 1536;
+const LOGO_HEIGHT = 1024;
 
 export function Logo({
   variant = "onLight",
@@ -18,27 +17,27 @@ export function Logo({
 }) {
   if (variant === "onDark") {
     return (
-      <Image
-        src={LOGO_SRC}
-        alt="mobilnahiska.si"
-        width={LOGO_WIDTH}
-        height={LOGO_HEIGHT}
-        priority
-        className={`w-auto object-contain ${className}`}
-      />
+      <span className={`inline-flex items-center rounded-[10px] bg-background px-3 py-1.5 ${className}`}>
+        <Image
+          src={LOGO_SRC}
+          alt="mobilnahiska.si"
+          width={LOGO_WIDTH}
+          height={LOGO_HEIGHT}
+          priority
+          className="h-full w-auto object-contain"
+        />
+      </span>
     );
   }
 
   return (
-    <span className={`inline-flex items-center rounded-[10px] bg-primary px-3 py-1.5 ${className}`}>
-      <Image
-        src={LOGO_SRC}
-        alt="mobilnahiska.si"
-        width={LOGO_WIDTH}
-        height={LOGO_HEIGHT}
-        priority
-        className="h-full w-auto object-contain"
-      />
-    </span>
+    <Image
+      src={LOGO_SRC}
+      alt="mobilnahiska.si"
+      width={LOGO_WIDTH}
+      height={LOGO_HEIGHT}
+      priority
+      className={`w-auto object-contain ${className}`}
+    />
   );
 }
