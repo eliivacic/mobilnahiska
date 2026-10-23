@@ -13,7 +13,7 @@ export function SellerCta() {
           Kupce dosežite s specializiranim oglasom na mobilnahiska.si.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild>
+          <Button asChild className="bg-brand-on-header text-brand-on-header-foreground hover:bg-brand-on-header-hover">
             <Link href="/oddaj-oglas">Oddaj oglas</Link>
           </Button>
           <Button asChild variant="secondary">

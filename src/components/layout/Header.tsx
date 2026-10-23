@@ -86,7 +86,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           {isAdmin ? (
             <>
               <NavLink href="/moj-racun" label="Moj račun" active={pathname === "/moj-racun"} />
-              <Button asChild className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
+              <Button asChild className="gap-1.5 bg-brand-on-header text-brand-on-header-foreground hover:bg-brand-on-header-hover">
                 <Link href="/admin">
                   <LayoutDashboard className="h-4 w-4" />
                   Admin nadzorna plošča
@@ -96,7 +96,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           ) : userEmail ? (
             <>
               <NavLink href="/moj-racun" label="Moj račun" active={pathname === "/moj-racun"} />
-              <Button asChild className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
+              <Button asChild className="gap-1.5 bg-brand-on-header text-brand-on-header-foreground hover:bg-brand-on-header-hover">
                 <Link href="/oddaj-oglas">
                   <Plus className="h-4 w-4" />
                   Oddaj oglas
@@ -106,7 +106,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           ) : (
             <>
               <NavLink href="/prijava" label="Prijava" active={pathname === "/prijava"} />
-              <Button asChild className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
+              <Button asChild className="gap-1.5 bg-brand-on-header text-brand-on-header-foreground hover:bg-brand-on-header-hover">
                 <Link href="/oddaj-oglas">
                   <Plus className="h-4 w-4" />
                   Oddaj oglas
@@ -155,14 +155,14 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
               </SheetClose>
               <SheetClose asChild>
                 {isAdmin ? (
-                  <Button asChild className="w-full gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
+                  <Button asChild className="w-full gap-1.5 bg-brand-on-header text-brand-on-header-foreground hover:bg-brand-on-header-hover">
                     <Link href="/admin">
                       <LayoutDashboard className="h-4 w-4" />
                       Admin nadzorna plošča
                     </Link>
                   </Button>
                 ) : (
-                  <Button asChild className="w-full gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
+                  <Button asChild className="w-full gap-1.5 bg-brand-on-header text-brand-on-header-foreground hover:bg-brand-on-header-hover">
                     <Link href="/oddaj-oglas">
                       <Plus className="h-4 w-4" />
                       Oddaj oglas

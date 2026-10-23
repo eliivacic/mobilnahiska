@@ -46,6 +46,9 @@
   --color-brand-hover: var(--brand-hover);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-muted: var(--brand-muted);
+  --color-brand-on-header: var(--brand-on-header);
+  --color-brand-on-header-hover: var(--brand-on-header-hover);
+  --color-brand-on-header-foreground: var(--brand-on-header-foreground);
   --color-header: var(--header);
   --color-header-foreground: var(--header-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
@@ -68,8 +71,8 @@
   --card-foreground: #302a26;
   --popover: #ffffff;
   --popover-foreground: #302a26;
-  --primary: #40291f;
-  --primary-foreground: #ffffff;
+  --primary: #c3d3bc;
+  --primary-foreground: #40291f;
   --secondary: #e9f0e5;
   --secondary-foreground: #40291f;
   --muted: #f5f7f2;
@@ -90,11 +93,21 @@
   --chart-5: oklch(0.269 0 0);
   --radius: 0.75rem;
   /* --brand/--brand-foreground drive buttons and any surface meant to read
-     as "primary" — always dark brown bg + white text, never inverted. */
-  --brand: #40291f;
-  --brand-hover: #2d1c15;
-  --brand-foreground: #ffffff;
+     as "primary" — mint-green bg + dark-brown text. Buttons sitting on top
+     of the --header green surface itself use --brand-on-header instead
+     (see below), since this same mint would be invisible against it. */
+  --brand: #c3d3bc;
+  --brand-hover: #a6b3a0;
+  --brand-foreground: #40291f;
   --brand-muted: #e9f0e5;
+  /* Deeper moss green, white text — the primary-button treatment for
+     anything placed on top of the --header surface (header/footer CTAs,
+     the homepage closing CTA band). Verified ≥4.5:1 with white text, and
+     distinct enough in lightness from --header (#C3D3BC) to read as a
+     separate element rather than blending into it. */
+  --brand-on-header: #6f786b;
+  --brand-on-header-hover: #5e665b;
+  --brand-on-header-foreground: #ffffff;
   /* --header/--header-foreground are the one deliberate exception: the
      sage-green surface (header, footer, closing CTA band) with dark-brown
      text/icons on top of it — kept separate from --brand so buttons placed
