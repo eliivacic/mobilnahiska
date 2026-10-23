@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 import type { Listing } from "@/types/listing";
 import type { Land } from "@/types/land";
 import { ListingCard } from "@/components/listings/ListingCard";
@@ -57,14 +59,32 @@ export function LatestListingsTabs({ listings, lands }: { listings: Listing[]; l
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {tab === "zemljisce"
-          ? items.map((land) => <LandCard key={land.id} land={land as Land} />)
-          : items.map((listing) => <ListingCard key={listing.id} listing={listing as Listing} />)}
-        {Array.from({ length: placeholderCount }).map((_, index) => (
-          <PlaceholderCard key={`placeholder-${index}`} />
-        ))}
-      </div>
+      {items.length === 0 ? (
+        <div className="mt-4 flex flex-col items-center rounded-[14px] border border-dashed border-border py-16 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/40">
+            <Plus className="h-5 w-5 text-brand" />
+          </div>
+          <p className="mt-4 text-sm font-semibold text-foreground">
+            V tej kategoriji še ni objavljenih oglasov.
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Bodite prvi, ki objavi svoj oglas.</p>
+          <Link
+            href="/oddaj-oglas"
+            className="mt-5 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+          >
+            Oddaj oglas
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {tab === "zemljisce"
+            ? items.map((land) => <LandCard key={land.id} land={land as Land} />)
+            : items.map((listing) => <ListingCard key={listing.id} listing={listing as Listing} />)}
+          {Array.from({ length: placeholderCount }).map((_, index) => (
+            <PlaceholderCard key={`placeholder-${index}`} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
