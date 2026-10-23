@@ -85,7 +85,7 @@ function PlanCard({ plan, isLoggedIn }: { plan: Plan; isLoggedIn: boolean }) {
   return (
     <div
       className={`flex h-full flex-col rounded-[14px] border bg-card p-6 ${
-        plan.is_featured ? "border-primary shadow-lift" : "border-border shadow-[0_1px_2px_rgba(48,37,33,0.04)]"
+        plan.is_featured ? "border-primary shadow-lift" : "border-border shadow-[0_1px_2px_rgba(48,42,38,0.04)]"
       }`}
     >
       {plan.is_featured && (

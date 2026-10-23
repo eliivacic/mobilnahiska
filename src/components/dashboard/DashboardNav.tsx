@@ -20,7 +20,7 @@ export function DashboardNav({ items }: { items: DashboardNavItem[] }) {
             key={item.href}
             href={item.href}
             className={`whitespace-nowrap rounded-[8px] px-3.5 py-2.5 text-sm font-medium transition-colors ${
-              active ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
+              active ? "bg-secondary text-secondary-foreground" : "text-foreground/70 hover:bg-muted hover:text-foreground"
             }`}
           >
             {item.label}

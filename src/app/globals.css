@@ -11,8 +11,8 @@
   --font-sans: var(--font-jakarta);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-jakarta);
-  --shadow-lift: 0 20px 40px -16px rgba(48, 37, 33, 0.16), 0 4px 14px -6px rgba(48, 37, 33, 0.08);
-  --shadow-lift-lg: 0 32px 64px -20px rgba(48, 37, 33, 0.2), 0 8px 20px -8px rgba(48, 37, 33, 0.1);
+  --shadow-lift: 0 20px 40px -16px rgba(48, 42, 38, 0.14), 0 4px 14px -6px rgba(48, 42, 38, 0.07);
+  --shadow-lift-lg: 0 32px 64px -20px rgba(48, 42, 38, 0.18), 0 8px 20px -8px rgba(48, 42, 38, 0.09);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,6 +46,8 @@
   --color-brand-hover: var(--brand-hover);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-muted: var(--brand-muted);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -60,42 +62,54 @@
      bar on /oglasi/[slug]) so CookieConsentBanner can stack above it instead
      of overlapping — see MobileCtaBarPresence.tsx. Default 0 everywhere else. */
   --mobile-cta-bar-offset: 0px;
-  --background: #faf7f3;
-  --foreground: #302521;
+  --background: #ffffff;
+  --foreground: #302a26;
   --card: #ffffff;
-  --card-foreground: #302521;
+  --card-foreground: #302a26;
   --popover: #ffffff;
-  --popover-foreground: #302521;
-  --primary: #5a3026;
+  --popover-foreground: #302a26;
+  --primary: #40291f;
   --primary-foreground: #ffffff;
-  --secondary: #dde8d9;
-  --secondary-foreground: #302521;
-  --muted: #f3eee8;
-  --muted-foreground: #766a64;
-  --accent: #b9cdb3;
-  --accent-foreground: #302521;
+  --secondary: #e9f0e5;
+  --secondary-foreground: #40291f;
+  --muted: #f5f7f2;
+  /* Brief's #77736D measured 4.37:1 on --muted (#F5F7F2) — just under WCAG
+     AA 4.5:1 for body text. Darkened 5% to clear both --muted and
+     --background while staying visually identical to the brief's intent. */
+  --muted-foreground: #736f69;
+  --accent: #c3d3bc;
+  --accent-foreground: #40291f;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e4ddd7;
-  --input: #e4ddd7;
-  --ring: #5a3026;
+  --border: #e2e8de;
+  --input: #e2e8de;
+  --ring: #40291f;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.75rem;
-  --brand: #5a3026;
-  --brand-hover: #43231c;
+  /* --brand/--brand-foreground drive buttons and any surface meant to read
+     as "primary" — always dark brown bg + white text, never inverted. */
+  --brand: #40291f;
+  --brand-hover: #2d1c15;
   --brand-foreground: #ffffff;
-  --brand-muted: #dde8d9;
+  --brand-muted: #e9f0e5;
+  /* --header/--header-foreground are the one deliberate exception: the
+     sage-green surface (header, footer, closing CTA band) with dark-brown
+     text/icons on top of it — kept separate from --brand so buttons placed
+     inside a green surface still render as normal brown-on-white primary
+     buttons instead of inheriting the green/brown pair. */
+  --header: #c3d3bc;
+  --header-foreground: #40291f;
   --sidebar: #ffffff;
-  --sidebar-foreground: #302521;
-  --sidebar-primary: #5a3026;
+  --sidebar-foreground: #302a26;
+  --sidebar-primary: #40291f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #dde8d9;
-  --sidebar-accent-foreground: #302521;
-  --sidebar-border: #e4ddd7;
-  --sidebar-ring: #5a3026;
+  --sidebar-accent: #e9f0e5;
+  --sidebar-accent-foreground: #40291f;
+  --sidebar-border: #e2e8de;
+  --sidebar-ring: #40291f;
 }
 
 .dark {

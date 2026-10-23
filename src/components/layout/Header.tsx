@@ -29,12 +29,12 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
     <Link
       href={href}
       className={`group relative py-1 text-[15px] font-medium transition-colors ${
-        active ? "text-brand-foreground" : "text-brand-foreground/65 hover:text-brand-foreground"
+        active ? "text-header-foreground" : "text-header-foreground/75 hover:text-header-foreground"
       }`}
     >
       {label}
       <span
-        className={`absolute inset-x-0 -bottom-0.5 h-px origin-left bg-brand-foreground transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        className={`absolute inset-x-0 -bottom-0.5 h-px origin-left bg-header-foreground transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
         }`}
       />
@@ -62,7 +62,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
     <>
       <div ref={sentinelRef} className="absolute top-0 h-px w-full" aria-hidden="true" />
       <header
-        className={`sticky top-0 z-40 border-b border-transparent bg-brand transition-shadow duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        className={`sticky top-0 z-40 border-b border-transparent bg-header transition-shadow duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           scrolled ? "shadow-lift backdrop-blur-md" : ""
         }`}
       >
@@ -86,7 +86,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           {isAdmin ? (
             <>
               <NavLink href="/moj-racun" label="Moj račun" active={pathname === "/moj-racun"} />
-              <Button asChild className="gap-1.5 bg-brand-foreground text-brand hover:bg-secondary">
+              <Button asChild className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
                 <Link href="/admin">
                   <LayoutDashboard className="h-4 w-4" />
                   Admin nadzorna plošča
@@ -96,7 +96,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           ) : userEmail ? (
             <>
               <NavLink href="/moj-racun" label="Moj račun" active={pathname === "/moj-racun"} />
-              <Button asChild className="gap-1.5 bg-brand-foreground text-brand hover:bg-secondary">
+              <Button asChild className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
                 <Link href="/oddaj-oglas">
                   <Plus className="h-4 w-4" />
                   Oddaj oglas
@@ -106,7 +106,7 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
           ) : (
             <>
               <NavLink href="/prijava" label="Prijava" active={pathname === "/prijava"} />
-              <Button asChild className="gap-1.5 bg-brand-foreground text-brand hover:bg-secondary">
+              <Button asChild className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
                 <Link href="/oddaj-oglas">
                   <Plus className="h-4 w-4" />
                   Oddaj oglas
@@ -121,13 +121,13 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
             <Button
               variant="outline"
               size="icon"
-              className="h-11 w-11 border-brand-foreground/25 bg-transparent text-brand-foreground hover:bg-brand-foreground/10 md:hidden"
+              className="h-11 w-11 border-header-foreground/25 bg-transparent text-header-foreground hover:bg-header-foreground/10 md:hidden"
               aria-label="Odpri meni"
             >
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-72 border-brand-foreground/10 bg-brand text-brand-foreground">
+          <SheetContent side="right" className="w-72 border-header-foreground/10 bg-header text-header-foreground">
             <SheetHeader>
               <SheetTitle className="sr-only">mobilnahiska.si</SheetTitle>
               <Logo variant="onLight" className="h-14 self-start" />
@@ -137,32 +137,32 @@ export function Header({ userEmail, isAdmin = false }: { userEmail?: string | nu
                 <SheetClose asChild key={link.href}>
                   <Link
                     href={link.href}
-                    className="rounded-sm px-2 py-2.5 text-base font-medium text-brand-foreground hover:bg-brand-foreground/10"
+                    className="rounded-sm px-2 py-2.5 text-base font-medium text-header-foreground hover:bg-header-foreground/10"
                   >
                     {link.label}
                   </Link>
                 </SheetClose>
               ))}
             </nav>
-            <div className="flex flex-col gap-2 border-t border-brand-foreground/15 px-4 pt-4">
+            <div className="flex flex-col gap-2 border-t border-header-foreground/15 px-4 pt-4">
               <SheetClose asChild>
                 <Link
                   href={userEmail ? "/moj-racun" : "/prijava"}
-                  className="py-2 text-sm font-medium text-brand-foreground/80"
+                  className="py-2 text-sm font-medium text-header-foreground/80"
                 >
                   {userEmail ? "Moj račun" : "Prijava"}
                 </Link>
               </SheetClose>
               <SheetClose asChild>
                 {isAdmin ? (
-                  <Button asChild className="w-full gap-1.5 bg-brand-foreground text-brand hover:bg-secondary">
+                  <Button asChild className="w-full gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
                     <Link href="/admin">
                       <LayoutDashboard className="h-4 w-4" />
                       Admin nadzorna plošča
                     </Link>
                   </Button>
                 ) : (
-                  <Button asChild className="w-full gap-1.5 bg-brand-foreground text-brand hover:bg-secondary">
+                  <Button asChild className="w-full gap-1.5 bg-brand text-brand-foreground hover:bg-brand-hover">
                     <Link href="/oddaj-oglas">
                       <Plus className="h-4 w-4" />
                       Oddaj oglas
