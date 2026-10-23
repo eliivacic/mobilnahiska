@@ -16,7 +16,10 @@ export default async function AdminOglasiPage() {
     .order("created_at", { ascending: false });
 
   const pending = (submissions ?? []).filter((item) => item.status === "pending_review");
-  const reviewed = (submissions ?? []).filter((item) => item.status !== "pending_review");
+  const awaitingRevision = (submissions ?? []).filter((item) => item.status === "needs_revision");
+  const reviewed = (submissions ?? []).filter(
+    (item) => item.status !== "pending_review" && item.status !== "needs_revision"
+  );
 
   return (
     <div>
@@ -50,6 +53,30 @@ export default async function AdminOglasiPage() {
           </div>
         )}
       </div>
+
+      {awaitingRevision.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-foreground/70">
+            Čaka na popravke prodajalca ({awaitingRevision.length})
+          </h2>
+          <div className="mt-3 space-y-3">
+            {awaitingRevision.map((item) => (
+              <ListingModerationRow
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                price={item.price}
+                location={item.location}
+                contactName={item.contact_name}
+                contactEmail={item.contact_email}
+                createdAt={item.created_at}
+                status={item.status}
+                rejectionReason={item.rejection_reason}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {reviewed.length > 0 && (
         <div className="mt-8">

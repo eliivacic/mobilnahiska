@@ -54,18 +54,35 @@ export function listingApprovedEmail(params: { title: string; expiresAt: string 
   };
 }
 
-export function listingRejectedEmail(params: { title: string; reason: string }) {
+export function listingRejectedEmail(params: { title: string; reason: string; submissionId: string }) {
   return {
-    subject: "Potrebna je dopolnitev oglasa | mobilnahiska.si",
+    subject: "Vaš oglas je bil zavrnjen | mobilnahiska.si",
     html: renderEmail({
-      title: "Potrebna je dopolnitev oglasa",
+      title: "Vaš oglas je bil zavrnjen",
       paragraphs: [
-        "Vašega oglasa žal (še) nismo mogli objaviti. Razlog administratorja:",
+        "Vašega oglasa žal nismo mogli objaviti. Razlog administratorja:",
         `<span style="display:block; padding:12px 16px; background:#F7F5F2; border-radius:8px; border:1px solid #E4DDD7;">${params.reason}</span>`,
       ],
       details: [{ label: "Naslov oglasa", value: params.title }],
       ctaLabel: "Uredi oglas",
-      ctaHref: `${SITE_URL}/oddaj-oglas`,
+      ctaHref: `${SITE_URL}/moj-racun/oglasi/${params.submissionId}/uredi`,
+    }),
+  };
+}
+
+export function listingNeedsRevisionEmail(params: { title: string; message: string; submissionId: string }) {
+  return {
+    subject: "Potrebne so dopolnitve vašega oglasa | mobilnahiska.si",
+    html: renderEmail({
+      title: "Potrebne so dopolnitve vašega oglasa",
+      paragraphs: [
+        "Vaš oglas še ni bil objavljen — pred objavo potrebuje nekaj popravkov. Opomba administratorja:",
+        `<span style="display:block; padding:12px 16px; background:#F7F5F2; border-radius:8px; border:1px solid #E4DDD7;">${params.message}</span>`,
+        "Ko popravite in shranite oglas, bo samodejno ponovno poslan v pregled.",
+      ],
+      details: [{ label: "Naslov oglasa", value: params.title }],
+      ctaLabel: "Uredi oglas",
+      ctaHref: `${SITE_URL}/moj-racun/oglasi/${params.submissionId}/uredi`,
     }),
   };
 }

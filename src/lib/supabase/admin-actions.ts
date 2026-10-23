@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/supabase/require-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logAdminAction } from "@/lib/supabase/audit";
 import { sendTransactionalEmail, isNotificationEnabled } from "@/lib/email/send";
-import { listingApprovedEmail, listingRejectedEmail } from "@/lib/email/templates";
+import { listingApprovedEmail, listingRejectedEmail, listingNeedsRevisionEmail } from "@/lib/email/templates";
 
 export async function moderateComment(commentId: string, status: "approved" | "hidden") {
   const { user } = await requireAdmin();
@@ -142,6 +142,71 @@ export async function updateUserRole(userId: string, role: "user" | "dealer" | "
   revalidatePath("/admin/uporabniki");
 }
 
+export interface UpdateUserProfileInput {
+  fullName: string;
+  phone: string;
+  companyName: string;
+}
+
+export async function updateUserProfile(userId: string, data: UpdateUserProfileInput) {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from("profiles")
+    .select("full_name, phone, company_name")
+    .eq("id", userId)
+    .single();
+
+  const record = {
+    full_name: data.fullName.trim() || null,
+    phone: data.phone.trim() || null,
+    company_name: data.companyName.trim() || null,
+  };
+
+  await admin.from("profiles").update(record).eq("id", userId);
+  await logAdminAction({
+    adminId: user.id,
+    action: "user.profile_edit",
+    entityType: "user",
+    entityId: userId,
+    before,
+    after: record,
+  });
+  revalidatePath("/admin/uporabniki");
+}
+
+export async function deleteUser(userId: string): Promise<{ error?: string }> {
+  const { user } = await requireAdmin();
+  if (userId === user.id) {
+    return { error: "Ne morete izbrisati lastnega računa." };
+  }
+  const admin = createAdminClient();
+
+  const { data: before } = await admin
+    .from("profiles")
+    .select("full_name, role, company_name")
+    .eq("id", userId)
+    .single();
+
+  // Deletes the auth.users row; ON DELETE CASCADE (see 06-podatkovni-model.md)
+  // takes profiles, listing_submissions, comments, favorites, payments, and
+  // subscriptions with it. This is permanent and cannot be undone from the
+  // app — the confirmation dialog in the UI is the only safety net.
+  const { error } = await admin.auth.admin.deleteUser(userId);
+  if (error) return { error: "Uporabnika ni bilo mogoče izbrisati." };
+
+  await logAdminAction({
+    adminId: user.id,
+    action: "user.delete",
+    entityType: "user",
+    entityId: userId,
+    before,
+    after: null,
+  });
+  revalidatePath("/admin/uporabniki");
+  return {};
+}
+
 export async function updatePortalSetting(key: string, value: string) {
   const { user } = await requireAdmin();
   const admin = createAdminClient();
@@ -267,13 +332,66 @@ export async function rejectListingSubmission(submissionId: string, reason: stri
   });
 
   if (await isNotificationEnabled("email_notify_listing_status")) {
-    const { subject, html } = listingRejectedEmail({ title: submission.title, reason });
+    const { subject, html } = listingRejectedEmail({ title: submission.title, reason, submissionId });
     await sendTransactionalEmail({
       to: submission.contact_email,
       subject,
       html,
       emailType: "listing_rejected",
       dedupKey: `listing_rejected:${submissionId}`,
+      userId: submission.user_id,
+      relatedEntityType: "listing_submission",
+      relatedEntityId: submissionId,
+    });
+  }
+
+  revalidatePath("/admin/oglasi");
+  revalidatePath("/moj-racun/oglasi");
+}
+
+// Distinct from reject: the listing is not terminal here — the submitter can
+// (and is expected to) edit it, which already resets status to
+// "pending_review" via updateListingSubmission(). This just gives that path
+// its own honest status/label/email instead of reusing "rejected" for
+// something that isn't final.
+export async function requestListingRevision(submissionId: string, message: string) {
+  const { user } = await requireAdmin();
+  const admin = createAdminClient();
+
+  const { data: submission } = await admin
+    .from("listing_submissions")
+    .select("title, contact_email, user_id, status")
+    .eq("id", submissionId)
+    .single();
+  if (!submission) return;
+
+  await admin
+    .from("listing_submissions")
+    .update({
+      status: "needs_revision",
+      rejection_reason: message,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user.id,
+    })
+    .eq("id", submissionId);
+
+  await logAdminAction({
+    adminId: user.id,
+    action: "listing_submission.request_revision",
+    entityType: "listing_submission",
+    entityId: submissionId,
+    before: { status: submission.status },
+    after: { status: "needs_revision", rejection_reason: message },
+  });
+
+  if (await isNotificationEnabled("email_notify_listing_status")) {
+    const { subject, html } = listingNeedsRevisionEmail({ title: submission.title, message, submissionId });
+    await sendTransactionalEmail({
+      to: submission.contact_email,
+      subject,
+      html,
+      emailType: "listing_needs_revision",
+      dedupKey: `listing_needs_revision:${submissionId}:${Date.now()}`,
       userId: submission.user_id,
       relatedEntityType: "listing_submission",
       relatedEntityId: submissionId,

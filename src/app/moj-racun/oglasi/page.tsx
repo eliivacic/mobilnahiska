@@ -15,6 +15,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   pending_review: { label: "V pregledu", className: "bg-accent text-primary" },
   published: { label: "Objavljeno", className: "bg-secondary text-primary" },
   rejected: { label: "Zavrnjeno", className: "bg-destructive/10 text-destructive" },
+  needs_revision: { label: "Čaka na popravke", className: "bg-accent text-primary" },
   deactivated: { label: "Deaktivirano", className: "bg-muted text-muted-foreground" },
 };
 
@@ -26,7 +27,9 @@ export default async function MojiOglasiPage() {
 
   const { data: submissions } = await supabase
     .from("listing_submissions")
-    .select("id, title, price, location, status, created_at, photo_urls, is_top, top_until, is_featured_homepage, featured_until")
+    .select(
+      "id, title, price, location, status, created_at, photo_urls, is_top, top_until, is_featured_homepage, featured_until, rejection_reason"
+    )
     .eq("user_id", user!.id)
     .order("created_at", { ascending: false });
 
@@ -90,6 +93,16 @@ export default async function MojiOglasiPage() {
                       {topActive && "TOP oglas"}
                       {topActive && featuredActive && " · "}
                       {featuredActive && "Izpostavljeno na naslovnici"}
+                    </p>
+                  )}
+                  {submission.status === "needs_revision" && submission.rejection_reason && (
+                    <p className="mt-2 max-w-md rounded-[8px] bg-accent/40 px-3 py-2 text-xs text-primary">
+                      Zahtevani popravki: {submission.rejection_reason}
+                    </p>
+                  )}
+                  {submission.status === "rejected" && submission.rejection_reason && (
+                    <p className="mt-2 max-w-md rounded-[8px] bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                      Razlog: {submission.rejection_reason}
                     </p>
                   )}
                 </div>

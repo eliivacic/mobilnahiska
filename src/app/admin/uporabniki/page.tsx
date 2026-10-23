@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/supabase/require-admin";
 import { formatDate } from "@/lib/format";
 import { RoleSelect } from "@/components/dashboard/RoleSelect";
+import { UserEditDialog } from "@/components/dashboard/UserEditDialog";
+import { DeleteUserButton } from "@/components/dashboard/DeleteUserButton";
 
 export const metadata: Metadata = { title: "Uporabniki | Admin | mobilnahiska.si" };
 
 export default async function AdminUporabnikiPage() {
+  const { user: currentAdmin } = await requireAdmin();
   const admin = createAdminClient();
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, full_name, role, company_name, created_at")
+    .select("id, full_name, phone, role, company_name, created_at")
     .order("created_at", { ascending: false });
 
   const { data: authUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
@@ -29,6 +33,7 @@ export default async function AdminUporabnikiPage() {
               <th className="px-4 py-3">Podjetje</th>
               <th className="px-4 py-3">Registracija</th>
               <th className="px-4 py-3">Vloga</th>
+              <th className="px-4 py-3">Dejanja</th>
             </tr>
           </thead>
           <tbody>
@@ -40,6 +45,19 @@ export default async function AdminUporabnikiPage() {
                 <td className="px-4 py-3 text-muted-foreground">{formatDate(profile.created_at)}</td>
                 <td className="px-4 py-3">
                   <RoleSelect userId={profile.id} role={profile.role} />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-2">
+                    <UserEditDialog
+                      userId={profile.id}
+                      defaultFullName={profile.full_name ?? ""}
+                      defaultPhone={profile.phone ?? ""}
+                      defaultCompanyName={profile.company_name ?? ""}
+                    />
+                    {profile.id !== currentAdmin.id && (
+                      <DeleteUserButton userId={profile.id} displayName={profile.full_name || "brez imena"} />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -53,8 +71,17 @@ export default async function AdminUporabnikiPage() {
             <p className="font-semibold text-foreground">{profile.full_name || "Brez imena"}</p>
             <p className="text-sm text-muted-foreground">{emailById.get(profile.id) ?? "—"}</p>
             <p className="mt-1 text-xs text-muted-foreground">Registracija: {formatDate(profile.created_at)}</p>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <RoleSelect userId={profile.id} role={profile.role} />
+              <UserEditDialog
+                userId={profile.id}
+                defaultFullName={profile.full_name ?? ""}
+                defaultPhone={profile.phone ?? ""}
+                defaultCompanyName={profile.company_name ?? ""}
+              />
+              {profile.id !== currentAdmin.id && (
+                <DeleteUserButton userId={profile.id} displayName={profile.full_name || "brez imena"} />
+              )}
             </div>
           </div>
         ))}

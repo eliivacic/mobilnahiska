@@ -4,7 +4,11 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { approveListingSubmission, rejectListingSubmission } from "@/lib/supabase/admin-actions";
+import {
+  approveListingSubmission,
+  rejectListingSubmission,
+  requestListingRevision,
+} from "@/lib/supabase/admin-actions";
 import { formatPrice, formatDateTimeSl } from "@/lib/format";
 
 interface Props {
@@ -15,7 +19,7 @@ interface Props {
   contactName: string;
   contactEmail: string;
   createdAt: string;
-  status: "pending_review" | "published" | "rejected";
+  status: "pending_review" | "published" | "rejected" | "needs_revision";
   rejectionReason: string | null;
 }
 
@@ -23,6 +27,7 @@ const STATUS_LABELS: Record<Props["status"], { label: string; className: string 
   pending_review: { label: "V pregledu", className: "bg-accent text-primary" },
   published: { label: "Objavljeno", className: "bg-secondary text-primary" },
   rejected: { label: "Zavrnjeno", className: "bg-destructive/10 text-destructive" },
+  needs_revision: { label: "Čaka na popravke", className: "bg-accent text-primary" },
 };
 
 export function ListingModerationRow({
@@ -37,7 +42,7 @@ export function ListingModerationRow({
   rejectionReason,
 }: Props) {
   const [pending, startTransition] = useTransition();
-  const [rejecting, setRejecting] = useState(false);
+  const [mode, setMode] = useState<"idle" | "rejecting" | "revising">("idle");
   const [reason, setReason] = useState("");
   const statusMeta = STATUS_LABELS[status];
 
@@ -57,10 +62,23 @@ export function ListingModerationRow({
       try {
         await rejectListingSubmission(id, reason);
         toast.success("Oglas zavrnjen, obrazložitev poslana.");
-        setRejecting(false);
+        setMode("idle");
         setReason("");
       } catch {
         toast.error("Napaka pri zavrnitvi oglasa.");
+      }
+    });
+  }
+
+  function handleRequestRevision() {
+    startTransition(async () => {
+      try {
+        await requestListingRevision(id, reason);
+        toast.success("Zahteva za popravke poslana prodajalcu.");
+        setMode("idle");
+        setReason("");
+      } catch {
+        toast.error("Napaka pri pošiljanju zahteve za popravke.");
       }
     });
   }
@@ -79,6 +97,11 @@ export function ListingModerationRow({
           {status === "rejected" && rejectionReason && (
             <p className="mt-2 rounded-[8px] bg-destructive/10 px-3 py-2 text-sm text-destructive">
               Razlog: {rejectionReason}
+            </p>
+          )}
+          {status === "needs_revision" && rejectionReason && (
+            <p className="mt-2 rounded-[8px] bg-accent/40 px-3 py-2 text-sm text-primary">
+              Zahtevani popravki: {rejectionReason}
             </p>
           )}
         </div>
@@ -101,11 +124,43 @@ export function ListingModerationRow({
             onConfirm={handleApprove}
           />
 
-          {!rejecting ? (
-            <Button size="sm" variant="outline" disabled={pending} onClick={() => setRejecting(true)}>
-              Zavrni
-            </Button>
-          ) : (
+          {mode === "idle" && (
+            <>
+              <Button size="sm" variant="secondary" disabled={pending} onClick={() => setMode("revising")}>
+                Pošlji za popravke
+              </Button>
+              <Button size="sm" variant="outline" disabled={pending} onClick={() => setMode("rejecting")}>
+                Zavrni
+              </Button>
+            </>
+          )}
+
+          {mode === "revising" && (
+            <div className="mt-2 w-full space-y-2">
+              <textarea
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                placeholder="Kaj mora prodajalec popraviti pred objavo (vidno v e-pošti) …"
+                rows={2}
+                className="w-full rounded-[10px] border border-border bg-background p-2.5 text-sm text-foreground focus-visible:border-ring focus-visible:outline-none"
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={pending || reason.trim().length < 3}
+                  className="bg-primary text-primary-foreground hover:bg-brand-hover"
+                  onClick={handleRequestRevision}
+                >
+                  Pošlji zahtevo za popravke
+                </Button>
+                <Button size="sm" variant="outline" disabled={pending} onClick={() => setMode("idle")}>
+                  Prekliči
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {mode === "rejecting" && (
             <div className="mt-2 w-full space-y-2">
               <textarea
                 value={reason}
@@ -123,7 +178,7 @@ export function ListingModerationRow({
                 >
                   Pošlji zavrnitev
                 </Button>
-                <Button size="sm" variant="outline" disabled={pending} onClick={() => setRejecting(false)}>
+                <Button size="sm" variant="outline" disabled={pending} onClick={() => setMode("idle")}>
                   Prekliči
                 </Button>
               </div>
