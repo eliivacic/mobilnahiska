@@ -19,7 +19,7 @@ interface Props {
   contactName: string;
   contactEmail: string;
   createdAt: string;
-  status: "pending_review" | "published" | "rejected" | "needs_revision";
+  status: "pending_review" | "published" | "rejected" | "needs_revision" | "deactivated";
   rejectionReason: string | null;
 }
 
@@ -28,6 +28,7 @@ const STATUS_LABELS: Record<Props["status"], { label: string; className: string 
   published: { label: "Objavljeno", className: "bg-secondary text-primary" },
   rejected: { label: "Zavrnjeno", className: "bg-destructive/10 text-destructive" },
   needs_revision: { label: "Čaka na popravke", className: "bg-accent text-primary" },
+  deactivated: { label: "Deaktivirano", className: "bg-muted text-muted-foreground" },
 };
 
 export function ListingModerationRow({
